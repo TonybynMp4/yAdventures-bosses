@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:entity_properties",
+  "entity": "this",
+  "predicate": {
+    "slots": {
+      "armor.head": {
+        "predicates": {
+          "minecraft:custom_data": "{yadventures-bosses:{crown:1b}}"
+        }
+      }
+    }
+  }
+}

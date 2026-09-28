@@ -1,0 +1,46 @@
+{
+  "criteria": {
+    "hurt": {
+      "trigger": "minecraft:entity_hurt_player",
+      "conditions": {
+        "player": {
+          "type": "minecraft:any_of",
+          "terms": [
+            {
+              "type": "minecraft:entity_properties",
+              "entity": "this",
+              "predicate": {
+                "slots": {
+                  "weapon.mainhand": {
+                    "predicates": {
+                      "minecraft:custom_data": "{yadventures-bosses:{kind:\"totem\"}}"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "minecraft:entity_properties",
+              "entity": "this",
+              "predicate": {
+                "slots": {
+                  "weapon.offhand": {
+                    "predicates": {
+                      "minecraft:custom_data": "{yadventures-bosses:{kind:\"totem\"}}"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "damage": {
+          "source_entity": {}
+        }
+      }
+    }
+  },
+  "rewards": {
+    "function": "yadventures-bosses:totem/hurt"
+  }
+}

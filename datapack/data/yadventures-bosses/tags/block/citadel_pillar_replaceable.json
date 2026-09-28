@@ -1,0 +1,11 @@
+{
+  "values": [
+    "minecraft:air",
+    "minecraft:cave_air",
+    "minecraft:water",
+    "minecraft:lava",
+    "minecraft:bubble_column",
+    "minecraft:fire",
+    "minecraft:soul_fire"
+  ]
+}

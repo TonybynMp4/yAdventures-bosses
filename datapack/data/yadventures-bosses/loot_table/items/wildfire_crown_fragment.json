@@ -1,0 +1,38 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:debug_stick",
+          "modifier": [
+            {
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:item_model": "yadventures-bosses:wildfire_crown_fragment",
+                "minecraft:item_name": {
+                  "translate": "item.yadventures-bosses.wildfire_crown_fragment"
+                },
+                "minecraft:max_stack_size": 64,
+                "minecraft:enchantment_glint_override": false,
+                "minecraft:rarity": "common",
+                "minecraft:lore": [
+                  {
+                    "translate": "item.yadventures-bosses.wildfire_crown_fragment.tooltip",
+                    "color": "gray",
+                    "italic": false
+                  }
+                ]
+              }
+            },
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": "{yadventures-bosses:{item:\"wildfire_crown_fragment\"}}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

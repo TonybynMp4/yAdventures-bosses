@@ -1,0 +1,39 @@
+{
+  "spawn_range": 2,
+  "total_mobs": 1,
+  "simultaneous_mobs": 1,
+  "total_mobs_added_per_player": 0,
+  "simultaneous_mobs_added_per_player": 0,
+  "ticks_between_spawn": 20,
+  "spawn_potentials": [
+    {
+      "weight": 1,
+      "data": {
+        "entity": {
+          "id": "minecraft:wandering_trader",
+          "Tags": [
+            "yadventures-bosses.convert",
+            "yadventures-bosses.convert.iceologer",
+            "yadventures-bosses.ominous",
+            "yadventures-bosses.from_spawner"
+          ],
+          "Silent": true,
+          "active_effects": [
+            {
+              "id": "minecraft:invisibility",
+              "duration": -1,
+              "show_particles": false
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "loot_tables_to_eject": [
+    {
+      "weight": 1,
+      "data": "yadventures-bosses:spawner/iceologer/ominous_key"
+    }
+  ],
+  "items_to_drop_when_ominous": "yadventures-bosses:spawner/nothing"
+}

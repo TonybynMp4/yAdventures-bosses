@@ -1,0 +1,41 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:filled_map",
+          "modifier": [
+            {
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:item_name": {
+                  "translate": "item.yadventures-bosses.citadel_map"
+                },
+                "minecraft:item_model": "yadventures-bosses:citadel_map"
+              }
+            },
+            {
+              "type": "minecraft:exploration_map",
+              "decoration": "minecraft:target_x",
+              "destination": "#yadventures-bosses:on_citadel_maps",
+              "search_radius": 50
+            },
+            {
+              "type": "minecraft:filtered",
+              "item_filter": {
+                "predicates": {
+                  "minecraft:map_id": {}
+                }
+              },
+              "on_fail": {
+                "type": "minecraft:discard"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
