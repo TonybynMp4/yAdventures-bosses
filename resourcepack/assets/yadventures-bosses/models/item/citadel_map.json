@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "yadventures-bosses:item/citadel_map"
+  }
+}

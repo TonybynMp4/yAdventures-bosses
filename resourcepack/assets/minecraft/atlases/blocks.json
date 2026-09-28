@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "type": "directory",
+      "source": "yadventures-bosses_entity",
+      "prefix": "entity/"
+    }
+  ]
+}

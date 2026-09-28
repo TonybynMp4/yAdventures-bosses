@@ -1,0 +1,6 @@
+{
+ "parent": "yadventures-bosses:iceologer/template/legs/right/2",
+ "textures": {
+  "0": "yadventures-bosses:entity/iceologer/legs/back/1"
+ }
+}

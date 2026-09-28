@@ -1,0 +1,145 @@
+{
+  "entity.player.mirror_move": {
+    "sounds": [
+      "yadventures-bosses:entity/player/mirror_move1",
+      "yadventures-bosses:entity/player/mirror_move2"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.player.mirror_move"
+  },
+  "entity.wildfire.ambient": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/ambient1",
+      "yadventures-bosses:entity/wildfire/ambient2",
+      "yadventures-bosses:entity/wildfire/ambient3",
+      "yadventures-bosses:entity/wildfire/ambient4"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.wildfire.ambient"
+  },
+  "entity.wildfire.death": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/death1",
+      "yadventures-bosses:entity/wildfire/death2",
+      "yadventures-bosses:entity/wildfire/death3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.wildfire.death"
+  },
+  "entity.wildfire.hurt": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/hurt1",
+      "yadventures-bosses:entity/wildfire/hurt2",
+      "yadventures-bosses:entity/wildfire/hurt3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.wildfire.hurt"
+  },
+  "entity.wildfire.shield_break": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/shield_break1",
+      "yadventures-bosses:entity/wildfire/shield_break2",
+      "yadventures-bosses:entity/wildfire/shield_break3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.wildfire.shield_break"
+  },
+  "entity.wildfire.shockwave": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/shockwave1",
+      "yadventures-bosses:entity/wildfire/shockwave2",
+      "yadventures-bosses:entity/wildfire/shockwave3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.wildfire.shoot"
+  },
+  "entity.wildfire.shoot": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/shoot1",
+      "yadventures-bosses:entity/wildfire/shoot2",
+      "yadventures-bosses:entity/wildfire/shoot3",
+      "yadventures-bosses:entity/wildfire/shoot4"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.wildfire.shoot"
+  },
+  "entity.wildfire.step": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/step1",
+      "yadventures-bosses:entity/wildfire/step2",
+      "yadventures-bosses:entity/wildfire/step3",
+      "yadventures-bosses:entity/wildfire/step4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "entity.wildfire.summon_blaze": {
+    "sounds": [
+      "yadventures-bosses:entity/wildfire/summon_blaze1",
+      "yadventures-bosses:entity/wildfire/summon_blaze2",
+      "yadventures-bosses:entity/wildfire/summon_blaze3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.wildfire.summon_blaze"
+  },
+  "item.armor.equip_wildfire_crown": {
+    "sounds": [
+      "yadventures-bosses:item/wildfire_crown/equip1",
+      "yadventures-bosses:item/wildfire_crown/equip2",
+      "yadventures-bosses:item/wildfire_crown/equip3"
+    ],
+    "subtitle": "subtitle.item.yadventures-bosses.armor.equip_wildfire_crown"
+  },
+  "entity.iceologer.ambient": {
+    "sounds": [
+      "yadventures-bosses:entity/iceologer/ambient1",
+      "yadventures-bosses:entity/iceologer/ambient2",
+      "yadventures-bosses:entity/iceologer/ambient3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.iceologer.ambient"
+  },
+  "entity.iceologer.cast_spell": {
+    "sounds": [
+      "yadventures-bosses:entity/iceologer/cast_spell1",
+      "yadventures-bosses:entity/iceologer/cast_spell2"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.iceologer.cast_spell"
+  },
+  "entity.iceologer.death": {
+    "sounds": [
+      "yadventures-bosses:entity/iceologer/death1",
+      "yadventures-bosses:entity/iceologer/death2",
+      "yadventures-bosses:entity/iceologer/death3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.iceologer.death"
+  },
+  "entity.iceologer.hurt": {
+    "sounds": [
+      "yadventures-bosses:entity/iceologer/hurt1",
+      "yadventures-bosses:entity/iceologer/hurt2",
+      "yadventures-bosses:entity/iceologer/hurt3"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.iceologer.hurt"
+  },
+  "entity.iceologer.prepare_slowness": {
+    "sounds": [
+      "yadventures-bosses:entity/iceologer/prepare_slowness"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.iceologer.prepare_slowness"
+  },
+  "entity.iceologer.prepare_summon": {
+    "sounds": [
+      "yadventures-bosses:entity/iceologer/prepare_summon"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.iceologer.prepare_summon"
+  },
+  "entity.ice_chunk.ambient": {
+    "sounds": [
+      "yadventures-bosses:entity/ice_chunk/ambient"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.ice_chunk.ambient"
+  },
+  "entity.ice_chunk.hit": {
+    "sounds": [
+      "yadventures-bosses:entity/ice_chunk/hit"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.ice_chunk.hit"
+  },
+  "entity.ice_chunk.summon": {
+    "sounds": [
+      "yadventures-bosses:entity/ice_chunk/summon"
+    ],
+    "subtitle": "subtitle.entity.yadventures-bosses.ice_chunk.summon"
+  }
+}
