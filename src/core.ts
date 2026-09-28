@@ -9,7 +9,7 @@ const shieldRotation = range(8).map((k) => {
 })
 const OBJECTIVES = `dummy id timer cooldown health shields absorbed regen state attack_cd charge_x charge_y charge_z
   fired decoy uid target hurt cast chunk_cd slow_cd stray_cd frozen age offset velocity shield_hp home_x home_y
-  home_z`.trim().split(/\s+/)
+  home_z wander wander_x wander_z`.trim().split(/\s+/)
 
 const load = fn('yadventures-bosses:load', `
 # yAdventures bosses: Iceologer, Illusioner, Wildfire

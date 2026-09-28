@@ -76,12 +76,21 @@ const walkingLegs = (v: string) => ({
 })
 
 itemDef('yadventures-bosses:iceologer/head', hurtVariant('head'))
-itemDef('yadventures-bosses:iceologer/body', {
+const iceBody = {
   type: 'minecraft:composite', models: [
     hurtVariant('body'),
     ifFlag(2, hurtVariant('arms/spellcasting'), hurtVariant('arms/crossed')),
     ifFlag(1, ifFlag(0, walkingLegs('hurt'), walkingLegs('normal')), hurtVariant('legs/static')),
   ],
+}
+itemDef('yadventures-bosses:iceologer/body', iceBody)
+// The Iceologer's wandering trader briefly holds a plain milk bucket each time it restarts drinking (see
+// iceologer.ts): draw milk held by any wandering trader as the body. Vanilla traders only hold milk while
+// drinking it invisible at dawn, where this shows a floating body instead of a floating bucket.
+itemDef('minecraft:milk_bucket', {
+  type: 'minecraft:select', property: 'minecraft:context_entity_type',
+  cases: [{ when: 'minecraft:wandering_trader', model: iceBody }],
+  fallback: modelRef('minecraft:item/milk_bucket'),
 })
 
 // Ice chunk (Friends & Foes model): three ice blocks and two slabs, 2 x 1 x 2.5 blocks

@@ -15,9 +15,11 @@ The Iceologer follows the Friends & Foes one: 36 HP, keeps its distance from pla
 three spells (see [mechanics.md](mechanics.md)):
 
 - **Ice chunk** (every 8 s): a chunk of ice grows above the target, follows it for 3–5 s, then
-  falls: 12 magic damage and freezing to everything under it (except illagers).
+  falls: 12 magic damage and freezing to everything under it (except illagers). Under a low roof it
+  hovers lower.
 - **Slowness** (every 11 s): freezes the target as if it had been in powder snow.
-- **Strays** (every 24 s, only while at most 1 of its strays is alive): 3–4 strays appear within 10 blocks.
+- **Strays** (every 24 s, only while at most 1 of its strays is alive): 3–4 strays appear within 10 blocks,
+  each with an iron axe or a bow.
 
 It drops 10 XP when killed by a player.
 

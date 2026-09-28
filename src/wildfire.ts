@@ -30,6 +30,7 @@ scoreboard players set @s yadventures-bosses.absorbed 0
 scoreboard players set @s yadventures-bosses.regen 0
 scoreboard players set @s yadventures-bosses.state 0
 scoreboard players set @s yadventures-bosses.attack_cd 20
+scoreboard players set @s yadventures-bosses.wander -40
 `)
 fn('yadventures-bosses:wildfire/spin', `
 # Shields turn 45 degrees every second, interpolated over 20 ticks
@@ -65,6 +66,7 @@ fn('yadventures-bosses:wildfire/ai', `
 execute if score @s yadventures-bosses.state matches 2 run return run function yadventures-bosses:wildfire/shockwave/tick
 execute if score @s yadventures-bosses.state matches 3 run return run function yadventures-bosses:wildfire/charge/tick
 execute unless entity @e[tag=yadventures-bosses.target,distance=..64] if score @s yadventures-bosses.state matches 1 run return run function yadventures-bosses:wildfire/barrage/stop
+execute if score @s yadventures-bosses.state matches 0 run function yadventures-bosses:wildfire/wander/tick
 execute unless entity @e[tag=yadventures-bosses.target,distance=..64] run return fail
 execute if score @s yadventures-bosses.state matches 1 run return run function yadventures-bosses:wildfire/barrage/tick
 # One attack at a time: attack ends -> cooldown -> next attack
@@ -234,7 +236,7 @@ function yadventures-bosses:wildfire/attack_end
 `)
 
 // ---- charge: 15-tick windup, then a straight dash (1.2 blocks/tick, up to 15 ticks) at where the target was,
-// hitting everything it touches once and stopping there
+// hitting everything it touches once and stopping there, followed by a shockwave
 fn('yadventures-bosses:wildfire/charge/start', `
 scoreboard players set @s yadventures-bosses.state 3
 scoreboard players set @s yadventures-bosses.timer 0
@@ -282,7 +284,7 @@ scoreboard players set #hit yadventures-bosses.dummy 1
 fn('yadventures-bosses:wildfire/charge/end', `
 data modify entity @s Motion set value [0d,0d,0d]
 execute if score #hit yadventures-bosses.dummy matches 1 run playsound minecraft:entity.generic.explode hostile @a ~ ~ ~ 0.6 1.6
-function yadventures-bosses:wildfire/attack_end
+function yadventures-bosses:wildfire/shockwave/start
 `)
 
 // ---- summon blazes
@@ -311,4 +313,42 @@ execute as @e[type=minecraft:blaze,tag=yadventures-bosses.new,distance=..6] run 
 fn('yadventures-bosses:wildfire/init_blaze', `
 tag @s remove yadventures-bosses.new
 scoreboard players operation @s yadventures-bosses.id = #id yadventures-bosses.dummy
+`)
+// ---- wander: between attacks (and without a target) it drifts in a straight line for 1-2 s at 0.1 blocks/tick,
+// then pauses 1.5-4 s. A Wildfire from a spawner heads back when it's more than 6 blocks from its spawn point.
+// (The vanilla blaze only strolls without a target, and rarely.)
+fn('yadventures-bosses:wildfire/wander/tick', `
+execute if score @s yadventures-bosses.wander matches ..-1 run return run scoreboard players add @s yadventures-bosses.wander 1
+execute if score @s yadventures-bosses.wander matches 0 run return run function yadventures-bosses:wildfire/wander/start
+execute store result entity @s Motion[0] double 0.0001 run scoreboard players get @s yadventures-bosses.wander_x
+execute store result entity @s Motion[2] double 0.0001 run scoreboard players get @s yadventures-bosses.wander_z
+scoreboard players remove @s yadventures-bosses.wander 1
+execute if score @s yadventures-bosses.wander matches 0 store result score @s yadventures-bosses.wander run random value -80..-30
+`)
+fn('yadventures-bosses:wildfire/wander/start', `
+execute store result storage yadventures-bosses:data wander.yaw int 1 run random value 0..359
+execute store result storage yadventures-bosses:data wander.x int 1 run scoreboard players get @s yadventures-bosses.home_x
+execute store result storage yadventures-bosses:data wander.z int 1 run scoreboard players get @s yadventures-bosses.home_z
+execute store result storage yadventures-bosses:data wander.y int 1 run scoreboard players get @s yadventures-bosses.home_y
+scoreboard players set #home yadventures-bosses.dummy 0
+execute if entity @s[tag=yadventures-bosses.leashed] run function yadventures-bosses:wildfire/wander/far_from_home with storage yadventures-bosses:data wander
+execute if score #home yadventures-bosses.dummy matches 0 run function yadventures-bosses:wildfire/wander/aim with storage yadventures-bosses:data wander
+execute if score #home yadventures-bosses.dummy matches 1 run function yadventures-bosses:wildfire/wander/aim_home with storage yadventures-bosses:data wander
+execute store result score @s yadventures-bosses.wander_x run data get entity @n[type=minecraft:marker,tag=yadventures-bosses.aim,distance=..2] Pos[0] 1000
+execute store result score @s yadventures-bosses.wander_z run data get entity @n[type=minecraft:marker,tag=yadventures-bosses.aim,distance=..2] Pos[2] 1000
+kill @e[type=minecraft:marker,tag=yadventures-bosses.aim,distance=..2]
+execute store result score #x yadventures-bosses.dummy run data get entity @s Pos[0] 1000
+execute store result score #z yadventures-bosses.dummy run data get entity @s Pos[2] 1000
+scoreboard players operation @s yadventures-bosses.wander_x -= #x yadventures-bosses.dummy
+scoreboard players operation @s yadventures-bosses.wander_z -= #z yadventures-bosses.dummy
+execute store result score @s yadventures-bosses.wander run random value 20..40
+`)
+fn('yadventures-bosses:wildfire/wander/far_from_home', `
+$execute unless entity @s[x=$(x),y=$(y),z=$(z),distance=..6] run scoreboard players set #home yadventures-bosses.dummy 1
+`)
+fn('yadventures-bosses:wildfire/wander/aim', `
+$execute rotated $(yaw) 0 run summon minecraft:marker ^ ^ ^1 {Tags:["yadventures-bosses.aim"]}
+`)
+fn('yadventures-bosses:wildfire/wander/aim_home', `
+$execute facing $(x) ~ $(z) run summon minecraft:marker ^ ^ ^1 {Tags:["yadventures-bosses.aim"]}
 `)

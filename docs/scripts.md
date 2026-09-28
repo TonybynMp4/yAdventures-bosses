@@ -87,8 +87,8 @@ The structure `.nbt` files aren't generated, so they can be edited in game:
    structures (citadel pillars, shack brewing stand) would run and delete themselves.
 2. Get a structure block (`give @s structure_block`) and switch it to Load. Enter the structure
    name (below) and click Load twice (the first click only shows the bounding box).
-3. Edit it. To move the boss's trial blocks, replace the boss jigsaw (below) with its final block
-   and place the given spawner and vaults where you want them. Vaults face you when placed. The
+3. Edit it. To move the boss's trial blocks, break them and place the given spawner and vaults
+   where you want them. Vaults face you when placed. The
    spawner needs open space within its spawn range (Iceologer 2, Illusioner 3, Wildfire 4 blocks,
    same y ±1) and line of sight from the spawn spot to the spawner.
 4. Switch the structure block to Save, keep the same name and size, turn **Include entities** on,
@@ -96,12 +96,20 @@ The structure `.nbt` files aren't generated, so they can be edited in game:
    and it overrides the datapack's copy in that world. Copy it over the file in
    `resources/datapack/data/yadventures-bosses/structure/`.
 
-| Structure | Size | Boss jigsaw (relative pos → final block) |
-|---|---|---|
-| `yadventures-bosses:iceologer_cabin/cabin/cabin` | 10×8×9 | [4,0,4] → brown_wool |
-| `yadventures-bosses:illusioner_shack/shack/shack` | 11×10×15 | [5,1,10] → spruce_planks |
-| `yadventures-bosses:illusioner_training_grounds/illusioner_training_grounds` | 13×4×13 | [5,0,6] → cobblestone |
-| `yadventures-bosses:citadel/citadel` | 31×33×31 | [15,8,15] → red_nether_bricks |
+| Structure | Size | Spawner | Vaults (normal, ominous) |
+|---|---|---|---|
+| `yadventures-bosses:iceologer_cabin/cabin/cabin` | 10×8×10 | [4,1,1] | [5,4,7], [3,4,7] |
+| `yadventures-bosses:illusioner_shack/shack/shack` (+ `basement`, 9×3×11) | 11×10×15 | [5,1,2] | basement [4,1,3], [1,1,4] |
+| `yadventures-bosses:illusioner_training_grounds/illusioner_training_grounds` | 13×4×15 | [6,0,8] | [5,1,1], [7,1,1] |
+| `yadventures-bosses:citadel/citadel` | 31×33×31 | [15,8,15] | [15,25,17], [15,25,13] |
 
-Leave the other jigsaws (goats, wolf, wither skeletons) alone. A kept boss jigsaw still attaches
-the setup marker, which places a second spawner and vaults.
+Leave the other jigsaws (goats, wolf, wither skeletons, villager, bridges, chains) alone.
+
+After saving, check the file before copying it in: a save can lose or duplicate things.
+- Setup markers (citadel pillars, shack brewing stand) are gone if the pack was enabled while the
+  structure was loaded; the brewing stand then keeps the potions it got, and the cabin armor stand
+  keeps its armor and loses its `cabin_armor_stand` tag.
+- Each Load adds the structure's entities again (e.g. stacked armor stands).
+- Opened chests/barrels lose their `LootTable`.
+- Vaults keep `server_data.state_updating_resumes_at` (a game time): in a younger world they stay
+  inactive until then. Remove `server_data` and `shared_data`.

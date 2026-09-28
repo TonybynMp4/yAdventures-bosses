@@ -11,10 +11,11 @@ Dying entities (Health 0, playing the death animation) aren't matched by `@e`, s
 
 Structures contain setup markers that a function turns into the real thing:
 
-- Boss spawn points are **markers** tagged `yadventures-bosses.setup` +
-  `yadventures-bosses.spawn_wildfire` / `spawn_iceologer` / `spawn_illusioner` (the shack's entity
-  template was edited to hold one). `yadventures-bosses:spawner/setup/<boss>` turns them into a boss
-  trial spawner plus vaults (see below).
+- Boss trial blocks (spawner, vault, ominous vault) are placed in the structure files themselves
+  (positions in [scripts.md](scripts.md#editing-structures)). The older boss spawn-point **markers**
+  (`yadventures-bosses.setup` + `yadventures-bosses.spawn_wildfire` / `spawn_iceologer` /
+  `spawn_illusioner`, from the `<structure>/entity/<boss>` pools) still work but no structure uses
+  them now: `yadventures-bosses:spawner/setup/<boss>` turns one into a boss trial spawner plus vaults (see below).
 - Brewing stands get a `yadventures-bosses.setup_brewing_stand` marker; `yadventures-bosses:setup/brewing_stand` fills them
   with random potions (night vision or invisibility).
 - Cabin armor stands are tagged `yadventures-bosses.cabin_armor_stand`; `yadventures-bosses:setup/armor_stand` gives a leather
@@ -30,7 +31,7 @@ around them over time. The only boss source is the trial spawner.
 
 ## Trial spawners (`yadventures-bosses:spawner/*`, `yadventures-bosses:convert/*`)
 
-Each lair gets a `trial_spawner` **on the floor** (marker y − 1; the marker sits 2 above the floor).
+A spawn-point marker gets a `trial_spawner` **on the floor** (marker y − 1; the marker sits 2 above the floor).
 A spawner sunk into the floor fails its spawn line-of-sight check almost every time. Next to it
 are two vaults, normal and ominous, in a row. The row follows the marker yaw when both spots are
 free (`vaults_x` / `vaults_z`) and the vaults face the side with open space.
@@ -117,8 +118,10 @@ it's invisible (at night it would drink an invisibility potion, but it's already
 drinking (`updatingUsingItem` needs the same item), and the goal restarts it with fresh milk every other
 tick, so clients saw milk flicker in its hand. Instead, `iceologer/tick` modifies the milk in place
 (`MILK_DISGUISE`): it gets the body's `item_model`/`custom_model_data` and loses its `consumable`
-component. It's still a milk bucket, so the drinking continues, finishing does nothing, and the
-goal's stop + restart happen within one AI step (never synced). While the mainhand isn't milk, it's
+component. It's still a milk bucket, so the drinking continues and finishing does nothing. Every 32
+ticks the drink finishes and the goal restarts it with a fresh milk bucket, which `startUsingItem` sends
+to clients right away, a tick before `iceologer/tick` can disguise it. So the resource pack draws
+`milk_bucket` held by any wandering trader (`context_entity_type`) as the body. While the mainhand isn't milk, it's
 refreshed from `armor.chest` as before. `yadventures-bosses:iceologer/second` still re-applies
 invisibility, just in case.
 
@@ -147,7 +150,8 @@ invisibility, just in case.
 - Tick 20: cast sound and the spell. The pose ends at tick 30 (ice chunk) or 20 (slowness, strays).
 - Strays (`iceologer/strays/*`): 3–4 (ominous 4) `stray`s, spread with `spreadplayers` within 10 blocks
   (ground below the Iceologer's y + 3; if that fails they stay at the Iceologer). Tagged
-  `yadventures-bosses.iceologer_stray`, on the `illagers` team (their arrows don't hurt it), and wearing an
+  `yadventures-bosses.iceologer_stray`, on the `illagers` team (their arrows don't hurt it), holding an iron
+  axe or a bow (50/50, default drop chance), and wearing an
   icy leather helmet (drop chance 0) so they don't burn in daylight. Vanilla stray loot.
 - Particle colours: strays (0.7, 0.85, 0.95).
 - Slowness: mobs get `TicksFrozen` 400 (powder snow freezing). Players can't be data-modified, so
@@ -159,6 +163,9 @@ invisibility, just in case.
 **Ice chunk** (`item_display` tagged `yadventures-bosses.ice_chunk`, model `yadventures-bosses:ice_chunk`):
 - Spawns above the target at its height squared, capped at 6 (players 3.24, villagers 3.8,
   iron golems 6, glow squid 0.64; `yadventures-bosses.offset`). It grows from scale 0 over 30 ticks.
+- Headroom (`ice_chunk/headroom`, on spawn and every follow tick): the height is lowered so the 1-block
+  chunk fits under whatever is above the target (`#yadventures-bosses:ice_chunk_passable`, checked every
+  0.25 blocks from 1 block up). Otherwise it sat in a low ceiling and landed on the roof.
 - Sounds: summon at age 10, ambient at age 40.
 - Follows the point above the target at 0.2 blocks/tick for 60–100 ticks (`yadventures-bosses.timer`).
   It's removed if the target becomes creative/spectator, and falls early if the target is gone.
@@ -254,12 +261,16 @@ particles, then runs `yadventures-bosses:totem/<kind>`.
   - Charge: 15-tick windup (flame particles, low blaze sound), then the direction to the target's
     eyes is locked (`charge_x/y/z`, ×1000) and Motion is set to 1.2 blocks/tick along it for up
     to 15 ticks. The first tick anything living (except allies) is within 2.2 of its center, all of
-    them take 10 damage and the charge stops.
+    them take 10 damage and the charge stops. It always ends in a shockwave where it stopped.
   - Summon blazes: 1–2 blazes tagged `yadventures-bosses.wildfire_blaze` with the same
     `yadventures-bosses.id`.
   - Barrage: a volley of 8 small fireballs every 11 ticks until 32 are fired, aimed with a
     spread (marker at `^ ^ ^1`, Motion = offset × 0.1, `Owner` = wildfire); an 8-damage melee
     hit on every other volley if the target is within 3. Stops early if the target is lost.
+- **Wander** (`wildfire/wander/*`, `yadventures-bosses.wander`, `wander_x/z`): while idle (state 0, with or
+  without a target) it drifts 20–40 ticks in a random horizontal direction at 0.1 blocks/tick (Motion, since
+  the vanilla `BlazeAttackGoal` holds the move flag in combat), then pauses 30–80 ticks (40 after spawning).
+  A leashed (spawner) Wildfire more than 6 blocks from its home heads home instead.
 - The vanilla blaze attack still runs. Small fireballs owned by a Wildfire without the
   `yadventures-bosses.debris` tag (its own volleys have it) are killed each tick.
 - Death (health ≤ 0): tag `yadventures-bosses.dead`, sound and particles, passengers killed.
@@ -291,7 +302,7 @@ and award hearts:
 | `yadventures-bosses.decoy` | ring id a distracted mob should attack |
 | `yadventures-bosses.health`, `yadventures-bosses.shields`, `yadventures-bosses.absorbed`, `yadventures-bosses.regen`, `yadventures-bosses.shield_hp` | wildfire shields |
 | `yadventures-bosses.home_x`, `home_y`, `home_z` | spawner bosses' leash position |
-| `yadventures-bosses.state`, `yadventures-bosses.attack_cd`, `yadventures-bosses.charge_x/y/z`, `yadventures-bosses.fired` | wildfire AI (`state` is also the Iceologer's current spell) |
+| `yadventures-bosses.state`, `yadventures-bosses.attack_cd`, `yadventures-bosses.charge_x/y/z`, `yadventures-bosses.fired`, `yadventures-bosses.wander`, `yadventures-bosses.wander_x/z` | wildfire AI (`state` is also the Iceologer's current spell) |
 | `yadventures-bosses.uid`, `yadventures-bosses.target` | Iceologer / ice chunk targets (`#next yadventures-bosses.uid` = counter) |
 | `yadventures-bosses.hurt`, `yadventures-bosses.cast`, `yadventures-bosses.chunk_cd`, `yadventures-bosses.slow_cd`, `yadventures-bosses.stray_cd` | Iceologer: last HurtTime, cast tick, spell cooldowns (seconds) |
 | `yadventures-bosses.age`, `yadventures-bosses.offset`, `yadventures-bosses.velocity` | ice chunk |

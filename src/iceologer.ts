@@ -58,7 +58,9 @@ execute as @e[scores={yadventures-bosses.uid=1..},distance=..64] if score @s yad
 // The wandering trader's "drink milk while invisible in daylight" goal can't be removed: it puts a milk bucket
 // in the mainhand and drinks it, then restarts. Replacing that milk with the body item would make it stop and
 // restart every other tick (flickering milk), so the milk is modified in place instead: it looks like the body
-// and has no consumable component, so drinking it does nothing and leaves it in the hand.
+// and has no consumable component, so drinking it does nothing and leaves it in the hand. The goal still restarts
+// with a fresh milk bucket every 32 ticks, which clients see for a tick: the resource pack draws milk held by a
+// wandering trader as the body too.
 const MILK_DISGUISE = '{type:"minecraft:set_components",components:{"minecraft:item_model":"yadventures-bosses:iceologer/body","minecraft:custom_model_data":{flags:[0b,0b,0b]},"!minecraft:consumable":{}}}'
 fn('yadventures-bosses:iceologer/tick', `
 execute if entity @s[tag=yadventures-bosses.dead] if items entity @s weapon.mainhand minecraft:milk_bucket[minecraft:consumable] run item modify entity @s weapon.mainhand [${MILK_DISGUISE},${flags([true, false, false])}]
@@ -207,7 +209,8 @@ execute if score @s yadventures-bosses.state matches 2 as @n[tag=yadventures-bos
 execute if score @s yadventures-bosses.state matches 3 run function yadventures-bosses:iceologer/strays/summon
 `)
 
-// ---- summon strays: 3-4 (ominous 4) at random spots within 10 blocks, only while at most 1 of its own is alive.
+// ---- summon strays: 3-4 (ominous 4) at random spots within 10 blocks, only while at most 1 of its own is alive,
+// each with an iron axe or a bow.
 // They wear a helmet so they don't burn in daylight, and join its team so their arrows don't hit it.
 fn('yadventures-bosses:iceologer/count_strays', `
 scoreboard players operation #id yadventures-bosses.dummy = @s yadventures-bosses.id
@@ -237,6 +240,9 @@ fn('yadventures-bosses:iceologer/strays/init', `
 tag @s remove yadventures-bosses.new
 scoreboard players operation @s yadventures-bosses.id = #id yadventures-bosses.dummy
 team join yadventures-bosses.illagers @s
+execute store result score #r yadventures-bosses.dummy run random value 0..1
+execute if score #r yadventures-bosses.dummy matches 0 run item replace entity @s weapon.mainhand with minecraft:iron_axe
+execute if score #r yadventures-bosses.dummy matches 1 run item replace entity @s weapon.mainhand with minecraft:bow
 particle minecraft:snowflake ~ ~1 ~ 0.3 0.6 0.3 0.05 20
 particle minecraft:poof ~ ~1 ~ 0.3 0.5 0.3 0.02 8
 `)
@@ -274,6 +280,7 @@ execute if entity @s[type=#yadventures-bosses:villagers] run scoreboard players 
 execute if entity @s[type=minecraft:iron_golem] run scoreboard players set #off yadventures-bosses.dummy 600
 execute if entity @s[type=minecraft:glow_squid] run scoreboard players set #off yadventures-bosses.dummy 64
 scoreboard players operation #t yadventures-bosses.dummy = @s yadventures-bosses.uid
+function yadventures-bosses:ice_chunk/headroom
 summon minecraft:item_display ~ ~ ~ {Tags:["yadventures-bosses.ice_chunk","yadventures-bosses.new"],teleport_duration:1,item:{id:"minecraft:stone",count:1,components:{"minecraft:item_model":"yadventures-bosses:ice_chunk"}},transformation:{translation:[0f,0.5f,0f],left_rotation:[0f,0f,0f,1f],scale:[0f,0f,0f],right_rotation:[0f,0f,0f,1f]}}
 execute as @e[type=minecraft:item_display,tag=yadventures-bosses.new,distance=..1] run function yadventures-bosses:ice_chunk/init
 `)
@@ -287,8 +294,23 @@ scoreboard players set @s yadventures-bosses.velocity 0
 execute store result score @s yadventures-bosses.timer run random value 60..100
 execute store result entity @s Rotation[0] float 1 run random value 0..359
 execute store result score #y yadventures-bosses.dummy run data get entity @s Pos[1] 100
-scoreboard players operation #y yadventures-bosses.dummy += #off yadventures-bosses.dummy
+scoreboard players operation #y yadventures-bosses.dummy += #h yadventures-bosses.dummy
 execute store result entity @s Pos[1] double 0.01 run scoreboard players get #y yadventures-bosses.dummy
+`)
+// Under a roof the chunk hovers lower, so it doesn't end up in (or land on) the ceiling
+fn('yadventures-bosses:ice_chunk/headroom', `
+# #h = #off, lowered so the 1-block chunk fits under whatever is above @s (checked every 0.25 blocks, from 1 block up)
+scoreboard players operation #lim yadventures-bosses.dummy = #off yadventures-bosses.dummy
+scoreboard players add #lim yadventures-bosses.dummy 100
+scoreboard players set #h yadventures-bosses.dummy 100
+execute positioned ~ ~1 ~ run function yadventures-bosses:ice_chunk/headroom_step
+scoreboard players remove #h yadventures-bosses.dummy 100
+`)
+fn('yadventures-bosses:ice_chunk/headroom_step', `
+execute if score #h yadventures-bosses.dummy >= #lim yadventures-bosses.dummy run return 0
+execute unless block ~ ~ ~ #yadventures-bosses:ice_chunk_passable run return 0
+scoreboard players add #h yadventures-bosses.dummy 25
+execute positioned ~ ~0.25 ~ run function yadventures-bosses:ice_chunk/headroom_step
 `)
 fn('yadventures-bosses:ice_chunk/tick', `
 scoreboard players add @s yadventures-bosses.age 1
@@ -305,9 +327,11 @@ function yadventures-bosses:util/tag_target
 execute unless entity @e[tag=yadventures-bosses.target,distance=..64] run return run scoreboard players operation @s yadventures-bosses.timer = @s yadventures-bosses.age
 execute if entity @e[type=minecraft:player,tag=yadventures-bosses.target,gamemode=!survival,gamemode=!adventure] run return run function yadventures-bosses:ice_chunk/discard
 execute at @n[tag=yadventures-bosses.target] run summon minecraft:marker ~ ~ ~ {Tags:["yadventures-bosses.aim"]}
+scoreboard players operation #off yadventures-bosses.dummy = @s yadventures-bosses.offset
+execute at @n[tag=yadventures-bosses.target] run function yadventures-bosses:ice_chunk/headroom
 tag @e[tag=yadventures-bosses.target] remove yadventures-bosses.target
 execute store result score #y yadventures-bosses.dummy run data get entity @n[type=minecraft:marker,tag=yadventures-bosses.aim] Pos[1] 100
-scoreboard players operation #y yadventures-bosses.dummy += @s yadventures-bosses.offset
+scoreboard players operation #y yadventures-bosses.dummy += #h yadventures-bosses.dummy
 execute store result entity @n[type=minecraft:marker,tag=yadventures-bosses.aim] Pos[1] double 0.01 run scoreboard players get #y yadventures-bosses.dummy
 # 0.2 blocks per tick
 execute if entity @n[type=minecraft:marker,tag=yadventures-bosses.aim,distance=..0.2] positioned as @n[type=minecraft:marker,tag=yadventures-bosses.aim] run tp @s ~ ~ ~
