@@ -33,9 +33,8 @@ Everything in `resources/` is edited directly:
   (`yadventures-bosses/structure`), worldgen (`yadventures-bosses/worldgen`, biome tags), chest/barrel loot, the textures
   (items, Wildfire, crown layer, Illusioner retexture, Iceologer, ice chunk) and the sounds with
   their sound files (`src/resourcepack.ts` writes `sounds.json`).
-- **Iceologer model files** (`yadventures-bosses/models/iceologer/`): the rig and leg animation are from
-  Myriad 1.6.5 (hood, cape and Santa variants dropped), retextured with the Friends & Foes
-  texture. `template/*` hold the geometry; the `normal`/`hurt` variants only set textures. The
+- **Iceologer model files** (`yadventures-bosses/models/iceologer/`): the rig and leg animation, textured
+  with the Friends & Foes texture. `template/*` hold the geometry; the `normal`/`hurt` variants only set textures. The
   leg textures under `textures/yadventures-bosses_entity/iceologer/legs/` are animated (`.mcmeta`).
   During the port, structure entities became setup markers (see [mechanics.md](mechanics.md))
   and loot was converted to 26.x syntax (see [minecraft-notes.md](minecraft-notes.md)).

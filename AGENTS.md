@@ -4,7 +4,7 @@ Datapack + resource pack for Minecraft Java 26.3 (data pack format 121, resource
 built with Sandstone: sources in `src/`, hand-maintained files in `resources/`, vanilla files in
 `vendor/`. `bun run build` writes both packs to `.sandstone/output/`.
 
-Personal use only: it contains content ported from Myriad and Friends & Foes, so don't publish it.
+Personal use only: it contains content ported from Friends & Foes, so don't publish it.
 
 ## Sources of information
 

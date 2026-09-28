@@ -1,9 +1,8 @@
 > [!WARNING]
 > **For personal use only.** This build is published so its author can download and test it. It
-> includes content derived from the Myriad datapack (the
-> Iceologer's model rig and leg animation) and the Friends & Foes mod (textures, sounds, models and
-> behaviour), whose licenses don't allow redistributing it. Please don't reupload, repackage or
-> redistribute these files.
+> includes content ported from the Friends & Foes mod (textures, sounds, models and behaviour),
+> which isn't the author's to redistribute. Please don't reupload, repackage or redistribute these
+> files.
 
 Datapack + resource pack for **Minecraft Java 26.3** adding three bosses (Iceologer, Illusioner,
 Wildfire), their lairs, trial spawners, vaults and loot.

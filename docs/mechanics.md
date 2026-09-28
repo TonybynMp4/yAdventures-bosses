@@ -88,7 +88,7 @@ free (`vaults_x` / `vaults_z`) and the vaults face the side with open space.
 
 ## Iceologer (`yadventures-bosses:iceologer/*`, `yadventures-bosses:ice_chunk/*`)
 
-Port of the Friends & Foes Iceologer, rendered the Myriad way.
+Port of the Friends & Foes Iceologer.
 
 **Entity:** an invisible, `Silent` `wandering_trader` tagged `yadventures-bosses.iceologer`: 36 HP, follow
 range 18, no trades, `DespawnDelay:0` (never despawns), team `yadventures-bosses.illagers`, loot

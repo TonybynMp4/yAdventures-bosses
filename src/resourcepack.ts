@@ -63,7 +63,7 @@ for (const n of range(5).slice(1)) {
   itemDef(`yadventures-bosses:wildfire/shields_${n}`, modelRef(`yadventures-bosses:wildfire/shields_${n}`))
 }
 
-// Iceologer: the model files in models/iceologer are hand-maintained (rig from Myriad, texture from Friends & Foes).
+// Iceologer: the model files in models/iceologer are hand-maintained (texture from Friends & Foes).
 // Item definitions pick the variant from custom_model_data flags: head [hurt], body [hurt, moving, spellcasting]
 const iceModel = (path: string) => modelRef(`yadventures-bosses:iceologer/${path}`)
 const ifFlag = (index: number, on_true: object, on_false: object) =>

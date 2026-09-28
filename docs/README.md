@@ -5,9 +5,8 @@ resource pack format 97.1) with three bosses (Iceologer, Illusioner, Wildfire), 
 `yadventures-bosses` namespace (except the small interface for the yAdventures heart pack, see
 [mechanics.md](mechanics.md)).
 
-Personal use only: it includes content derived from the Myriad datapack (the Iceologer's model rig
-and leg animation) and the Friends & Foes mod (textures, sounds, models and behaviour), so don't
-publish it.
+Personal use only: it includes content derived from the Friends & Foes mod (textures, sounds,
+models and behaviour), so don't publish it. The GitHub releases say so too.
 
 | Doc | What's in it |
 |---|---|
