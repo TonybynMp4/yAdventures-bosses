@@ -1,0 +1,32 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 5,
+      "element": {
+        "location": "yadventures-bosses:citadel/platform/platform_broken",
+        "processors": "yadventures-bosses:citadel/citadel",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 3,
+      "element": {
+        "location": "yadventures-bosses:citadel/platform/platform_damaged",
+        "processors": "yadventures-bosses:citadel/citadel",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "yadventures-bosses:citadel/platform/platform",
+        "processors": "yadventures-bosses:citadel/citadel",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

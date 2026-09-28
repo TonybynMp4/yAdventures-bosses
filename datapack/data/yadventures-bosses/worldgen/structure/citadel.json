@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:jigsaw",
+  "start_pool": "yadventures-bosses:citadel/base_plate",
+  "size": 10,
+  "biomes": "#yadventures-bosses:has_structure/citadel",
+  "step": "strongholds",
+  "terrain_adaptation": "none",
+  "start_height": {
+    "type": "minecraft:uniform",
+    "min_inclusive": {
+      "absolute": 34
+    },
+    "max_inclusive": {
+      "absolute": 54
+    }
+  },
+  "max_distance_from_center": 64,
+  "use_expansion_hack": false,
+  "spawn_overrides": {}
+}
