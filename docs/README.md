@@ -17,5 +17,5 @@ publish it.
 | [minecraft-notes.md](minecraft-notes.md) | Engine facts learned along the way (26.x formats, AI, rendering, gotchas) |
 
 The functions, items, recipes, item definitions and most models are **generated** by Sandstone from `src/`
-(`npm run build`, output in `.sandstone/output/`). Structures, worldgen, chest loot, textures and sounds are
+(`bun run build`, output in `.sandstone/output/`). Structures, worldgen, chest loot, textures and sounds are
 hand-maintained in `resources/` (see [scripts.md](scripts.md)).

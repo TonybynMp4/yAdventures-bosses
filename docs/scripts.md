@@ -3,12 +3,11 @@
 The packs are built with [Sandstone](https://sandstone.dev) (TypeScript, run by Bun):
 
 ```sh
-npm ci            # or bun install
-npm run build     # or: npm run watch
+bun install
+bun run build     # or: bun run watch; bun run typecheck
 ```
 
-npm 12+ blocks install scripts unless allowed: `allowScripts` in `package.json` lets bun's (the
-runtime Sandstone uses) and `@parcel/watcher`'s run. Bun itself reads `trustedDependencies`.
+Bun (version pinned by `packageManager` in `package.json`) is required: the `sand` CLI runs on it.
 
 The output goes to `.sandstone/output/{datapack,resourcepack}` (gitignored; nothing built is committed).
 Only Sandstone's written files and `resources/` end up in it, so dropped or renamed resources disappear
@@ -20,8 +19,9 @@ on the next build. If the output looks incomplete after deleting it, delete `.sa
 | `src/` | The generator: items/loot/recipes/predicates/tags/advancement, all functions, the load/tick function tags, and the resource pack's item definitions, generated models (items, Wildfire, ice chunk), equipment asset, atlas, lang and `sounds.json`. One module per area (`core`, `illusioner`, `iceologer`, `totems`, `wildfire`, `spawners`, `maps`, `resourcepack`); `index.ts` imports them all. Functions are written as raw command text (`fn()` in `lib.ts`). |
 | `resources/{datapack,resourcepack}/` | Hand-maintained files, copied into the output as is (see below). |
 | `vendor/` | Vanilla 26.3 files that generated resources build on (see below). |
-| `scripts/load-test.sh` | Boots a 26.3 server (downloaded, SHA-1 checked) with the built datapack and fails on any error or warning in the log. Needs Java 25: `scripts/load-test.sh [workdir]` (default `/tmp/yab-ci`). |
-| `.github/workflows/build.yml` | CI on every push/PR: `npm ci`, build, upload both packs as artifacts, then `load-test.sh`. |
+| `scripts/load-test.sh` | Boots a 26.3 server (downloaded, SHA-1 checked) on a fresh seed-12345 world with the built datapack, summons all six bosses (normal + ominous), lets them tick for 10 s, checks 2 of each are alive, runs `/reload`, and fails on any error, warning or command error in the log. Needs Java 25: `scripts/load-test.sh [workdir]` (default `/tmp/yab-ci`; `PACK=<dir>` to test another build). |
+| `.github/workflows/build.yml` | CI on every push/PR, three jobs: `typecheck` (`bun run typecheck`), `build` (uploads the datapack and resource pack as artifacts, each a ready-to-use zip), `load-test` (runs `load-test.sh` on the built datapack and uploads the server log). |
+| `.github/dependabot.yml` | Weekly grouped updates for the Bun packages and GitHub Actions. |
 | `scripts/rcon.py` | Tiny RCON client for the test server: `python3 scripts/rcon.py 'cmd 1' 'cmd 2' ...` (127.0.0.1:25575, password `x`). |
 
 ## Hand-maintained files
