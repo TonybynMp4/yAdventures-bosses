@@ -63,7 +63,7 @@ for (const n of range(5).slice(1)) {
   itemDef(`yadventures-bosses:wildfire/shields_${n}`, modelRef(`yadventures-bosses:wildfire/shields_${n}`))
 }
 
-// Iceologer: the model files in models/iceologer are hand-maintained (rig from Myriad, texture from Friends & Foes).
+// Iceologer: the model files in models/iceologer are hand-maintained (texture from Friends & Foes).
 // Item definitions pick the variant from custom_model_data flags: head [hurt], body [hurt, moving, spellcasting]
 const iceModel = (path: string) => modelRef(`yadventures-bosses:iceologer/${path}`)
 const ifFlag = (index: number, on_true: object, on_false: object) =>
@@ -86,7 +86,7 @@ itemDef('yadventures-bosses:iceologer/body', {
 
 // Ice chunk (Friends & Foes model): three ice blocks and two slabs, 2 x 1 x 2.5 blocks
 const ICE_TEX = { 0: 'yadventures-bosses:entity/ice_chunk', particle: 'yadventures-bosses:entity/ice_chunk' }
-Model('', 'yadventures-bosses:ice_chunk', {
+Model('' as any, 'yadventures-bosses:ice_chunk', { // '' = models/ root (the types only allow a subfolder)
   texture_size: [64, 64], textures: ICE_TEX, elements: [
     cube([-8, 0, 4], [8, 16, 20], [0, 0], [16, 16, 16]),
     cube([8, 0, 4], [24, 16, 20], [0, 0], [16, 16, 16]),
