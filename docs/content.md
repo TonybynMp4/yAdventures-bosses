@@ -84,7 +84,7 @@ Vault loot (`loot_table/spawner/<boss>/{vault,ominous_vault}`):
 Signature items: Totem of Freezing (Iceologer), Totem of Illusion (Illusioner), 3–5 Wildfire Crown
 Fragments (Wildfire). The bosses themselves only drop minor items.
 
-The pools per boss are in `VAULT_LOOT` in `scripts/build.py`. They hold enchanted books and gear,
+The pools per boss are in `VAULT_LOOT` in `src/spawners.ts`. They hold enchanted books and gear,
 potions, crown templates, netherite scrap, etc.
 
 ## Items

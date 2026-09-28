@@ -1,24 +1,37 @@
-# Scripts
+# Build and scripts
 
-All in `scripts/`. Python 3, standard library only, runs from anywhere.
+The packs are built with [Sandstone](https://sandstone.dev) (TypeScript, run by Bun):
 
-| File | Does |
+```sh
+npm ci            # or bun install
+npm run build     # or: npm run watch
+```
+
+npm 12+ blocks install scripts unless allowed: `allowScripts` in `package.json` lets bun's (the
+runtime Sandstone uses) and `@parcel/watcher`'s run. Bun itself reads `trustedDependencies`.
+
+The output goes to `.sandstone/output/{datapack,resourcepack}` (gitignored; nothing built is committed).
+Only Sandstone's written files and `resources/` end up in it, so dropped or renamed resources disappear
+on the next build. If the output looks incomplete after deleting it, delete `.sandstone/` as a whole:
+`cache.json` makes Sandstone skip files it thinks are unchanged.
+
+| Path | Holds |
 |---|---|
-| `build.py` | Generates items/loot/recipes/predicates/tags/advancement, all functions, the load/tick function tags, and the resource pack's item definitions, generated models (items, Wildfire, ice chunk), equipment asset, atlas, lang and the Iceologer entries of `sounds.json`. Idempotent. |
-| `vendor/` | Two vanilla 26.3 files the crowned helmet builds on: the netherite equipment asset and the `netherite_helmet` item model (with trim variants). Refresh them from the client jar if Mojang changes them. |
-| `rcon.py` | Tiny RCON client for the test server: `python3 rcon.py 'cmd 1' 'cmd 2' ...` (127.0.0.1:25575, password `x`). |
-
-Run `python3 scripts/build.py` after editing it. Files it no longer generates are **not**
-deleted, so remove stale outputs by hand when renaming or dropping something.
+| `src/` | The generator: items/loot/recipes/predicates/tags/advancement, all functions, the load/tick function tags, and the resource pack's item definitions, generated models (items, Wildfire, ice chunk), equipment asset, atlas, lang and `sounds.json`. One module per area (`core`, `illusioner`, `iceologer`, `totems`, `wildfire`, `spawners`, `maps`, `resourcepack`); `index.ts` imports them all. Functions are written as raw command text (`fn()` in `lib.ts`). |
+| `resources/{datapack,resourcepack}/` | Hand-maintained files, copied into the output as is (see below). |
+| `vendor/` | Vanilla 26.3 files that generated resources build on (see below). |
+| `scripts/load-test.sh` | Boots a 26.3 server (downloaded, SHA-1 checked) with the built datapack and fails on any error or warning in the log. Needs Java 25: `scripts/load-test.sh [workdir]` (default `/tmp/yab-ci`). |
+| `.github/workflows/build.yml` | CI on every push/PR: `npm ci`, build, upload both packs as artifacts, then `load-test.sh`. |
+| `scripts/rcon.py` | Tiny RCON client for the test server: `python3 scripts/rcon.py 'cmd 1' 'cmd 2' ...` (127.0.0.1:25575, password `x`). |
 
 ## Hand-maintained files
 
-Everything else in the pack is edited directly:
+Everything in `resources/` is edited directly:
 
 - **Ported once** (the porting script is gone): structures
   (`yadventures-bosses/structure`), worldgen (`yadventures-bosses/worldgen`, biome tags), chest/barrel loot, the textures
   (items, Wildfire, crown layer, Illusioner retexture, Iceologer, ice chunk) and the sounds with
-  `yadventures-bosses/sounds.json` (`build.py` adds the Iceologer/ice chunk events to it).
+  their sound files (`src/resourcepack.ts` writes `sounds.json`).
 - **Iceologer model files** (`yadventures-bosses/models/iceologer/`): the rig and leg animation are from
   Myriad 1.6.5 (hood, cape and Santa variants dropped), retextured with the Friends & Foes
   texture. `template/*` hold the geometry; the `normal`/`hurt` variants only set textures. The
@@ -27,9 +40,9 @@ Everything else in the pack is edited directly:
   and loot was converted to 26.x syntax (see [minecraft-notes.md](minecraft-notes.md)).
   Later hand edits: `illusioner_shack/entity/illusioner.nbt` holds a `spawn_illusioner` marker,
   the Iceologer marker has Rotation `[0,0]`, and every structure has empty `spawn_overrides`.
-- **Vendored vanilla files** (`scripts/vendor/`): besides the netherite helmet assets, the 26.3 loot tables
+- **Vendored vanilla files** (`vendor/`): besides the netherite helmet assets, the 26.3 loot tables
   `chests/bastion_treasure`, `bastion_other` and `woodland_mansion`.
-  `build.py` writes them to `data/minecraft/loot_table/` with an explorer map pool added. Re-vendor
+  `src/maps.ts` writes them to `data/minecraft/loot_table/` with an explorer map pool added. Re-vendor
   them when updating Minecraft, since they replace the vanilla tables. Another pack that overrides
   the same tables will conflict.
 - **Map icons**: `minecraft/textures/map/decorations/{target_x,target_point,blue_marker}.png` and
@@ -43,7 +56,7 @@ Everything else in the pack is edited directly:
 
 ```sh
 # server.properties: enable-rcon=true, rcon.password=x (rcon.port 25575)
-cp -r datapack <server>/world/datapacks/yadv
+cp -r .sandstone/output/datapack <server>/world/datapacks/yadv
 java -Xmx3G -jar server.jar nogui > log.txt 2>&1 &
 grep -i "error\|couldn't\|failed" log.txt     # datapack load errors show up here
 python3 scripts/rcon.py 'reload' 'function yadventures-bosses:commands/summon/wildfire'
@@ -66,7 +79,7 @@ Tips:
 
 ## Editing structures
 
-The structure `.nbt` files aren't generated by build.py, so they can be edited in game:
+The structure `.nbt` files aren't generated, so they can be edited in game:
 
 1. Use a creative world with cheats and the pack installed. Run
    `function yadventures-bosses:commands/give/<boss>_trial_blocks` first, then
@@ -81,7 +94,7 @@ The structure `.nbt` files aren't generated by build.py, so they can be edited i
 4. Switch the structure block to Save, keep the same name and size, turn **Include entities** on,
    and click Save. The file is written to `<world>/generated/yadventures-bosses/structure/<name>.nbt`,
    and it overrides the datapack's copy in that world. Copy it over the file in
-   `datapack/data/yadventures-bosses/structure/`.
+   `resources/datapack/data/yadventures-bosses/structure/`.
 
 | Structure | Size | Boss jigsaw (relative pos → final block) |
 |---|---|---|

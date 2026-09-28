@@ -1,0 +1,37 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: datapack
+          path: .sandstone/output/datapack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resourcepack
+          path: .sandstone/output/resourcepack
+
+      # Boot a 26.3 server with the datapack and fail on any load error
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/yab-ci/server.jar
+          key: server-jar-33680f5f2ac32864d6d7cf5e56a705fdb3e05f4c
+      - run: scripts/load-test.sh /tmp/yab-ci

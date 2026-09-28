@@ -13,9 +13,9 @@ publish it.
 |---|---|
 | [content.md](content.md) | What the pack adds: mobs, structures, items, recipes, loot, admin functions |
 | [mechanics.md](mechanics.md) | How each feature is implemented (functions, tags, scoreboards) |
-| [scripts.md](scripts.md) | The generator scripts, their inputs, and the test-server workflow |
+| [scripts.md](scripts.md) | The Sandstone build, its inputs, and the test-server workflow |
 | [minecraft-notes.md](minecraft-notes.md) | Engine facts learned along the way (26.x formats, AI, rendering, gotchas) |
 
-The functions, items, recipes, item definitions and most models are **generated** by `scripts/build.py`: edit
-the script, not the output. Structures, worldgen, chest loot, textures and sounds are
-edited in place (see [scripts.md](scripts.md)).
+The functions, items, recipes, item definitions and most models are **generated** by Sandstone from `src/`
+(`npm run build`, output in `.sandstone/output/`). Structures, worldgen, chest loot, textures and sounds are
+hand-maintained in `resources/` (see [scripts.md](scripts.md)).

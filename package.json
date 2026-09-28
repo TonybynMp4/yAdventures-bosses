@@ -1,0 +1,28 @@
+{
+  "name": "yadventures-bosses",
+  "version": "0.0.1",
+  "private": true,
+  "description": "yAdventures bosses: Iceologer, Illusioner & Wildfire (datapack + resource pack)",
+  "type": "module",
+  "module": "src/index.ts",
+  "scripts": {
+    "build": "sand build",
+    "watch": "sand watch"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "bun": "^1.4.2",
+    "sandstone-cli": "^2.6.9"
+  },
+  "dependencies": {
+    "sandstone": "~1.2.36"
+  },
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "bun"
+  ],
+  "allowScripts": {
+    "bun@1.4.2": true,
+    "@parcel/watcher@2.6.0": true
+  }
+}

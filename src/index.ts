@@ -1,0 +1,11 @@
+// yAdventures bosses: Iceologer, Illusioner & Wildfire. Each module registers its resources on import.
+import './items.ts'
+import './tags.ts'
+import './core.ts'
+import './illusioner.ts'
+import './iceologer.ts'
+import './totems.ts'
+import './wildfire.ts'
+import './spawners.ts'
+import './maps.ts'
+import './resourcepack.ts'
