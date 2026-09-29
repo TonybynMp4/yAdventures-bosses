@@ -41,6 +41,9 @@ tag @s add yadventures-bosses.converting
 execute if entity @s[tag=yadventures-bosses.convert.iceologer] run function yadventures-bosses:convert/iceologer
 execute if entity @s[tag=yadventures-bosses.convert.illusioner] run function yadventures-bosses:convert/illusioner
 execute if entity @s[tag=yadventures-bosses.convert.wildfire] run function yadventures-bosses:convert/wildfire
+# Boots, not drawn (none of their models renders armor): 3 armor, Protection IV -16 % damage, -64 % fall damage with Feather Falling IV
+item replace entity @s armor.feet with minecraft:diamond_boots[enchantments={protection:4,feather_falling:4}]
+data modify entity @s drop_chances.feet set value 0f
 # Health: x1.5 when ominous, then x0.5 on easy and x1.5 on hard
 execute store result score #difficulty yadventures-bosses.dummy run difficulty
 attribute @s[tag=yadventures-bosses.ominous] minecraft:max_health modifier add yadventures-bosses:ominous 0.5 add_multiplied_total
@@ -55,7 +58,7 @@ tag @s remove yadventures-bosses.converting
 `)
 fn('yadventures-bosses:convert/illusioner', `
 data merge entity @s {PersistenceRequired:1b,${NO_DROPS}}
-item replace entity @s weapon.mainhand with minecraft:bow
+item replace entity @s weapon.mainhand with minecraft:bow[enchantments={power:4}]
 attribute @s minecraft:max_health base set 48
 `)
 for (const boss of BOSSES) {

@@ -78,7 +78,8 @@ purpose: a survival player aiming at one with a pickaxe gets `block_break_speed`
 Efficiency V pickaxe and 64 s with a plain diamond one. They drop nothing.
 
 Boss health (×1.5 when ominous, ×0.5 easy, ×1.5 hard): Iceologer 36, Illusioner 48,
-Wildfire 180 on normal. See [mechanics.md](mechanics.md).
+Wildfire 180 on normal. All three wear hidden diamond boots with Protection IV and Feather Falling IV.
+See [mechanics.md](mechanics.md).
 
 Vault loot (`loot_table/spawner/<boss>/{vault,ominous_vault}`):
 - normal vault: the boss's signature item + 1 rare roll + 2–4 common rolls;

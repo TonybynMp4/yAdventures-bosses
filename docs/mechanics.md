@@ -43,6 +43,8 @@ free (`vaults_x` / `vaults_z`) and the vaults face the side with open space.
 - `yadventures-bosses:tick` runs `convert/run` on those mobs. It applies the boss setup (the same
   as `commands/summon/*`), scales max health (below), sets health to max, and for spawner mobs
   stores the home position (`spawner/set_home`).
+- Every boss gets diamond boots with Protection IV and Feather Falling IV (drop chance 0). None of their
+  renderers draw armor, so they're invisible: 3 armor, −16 % damage, −64 % fall damage.
 - **Health scaling** (max_health modifiers, applied once at conversion): `yadventures-bosses:ominous`
   +0.5 (×1.5) when ominous, then `yadventures-bosses:difficulty` −0.5 on easy / +0.5 on hard
   (`add_multiplied_total`).
@@ -211,10 +213,14 @@ Used by both the Illusioner and the Totem of Illusion. `#mode yadventures-bosses
 Replaces the vanilla mirror/invisibility spell with real illusions:
 
 - Clears vanilla long invisibility (`yadventures-bosses:long_invisibility`, > 60 ticks) every tick.
+- Vanilla blindness spell (20 s, cast once per new target by every illusioner, copies included): when its target
+  has blindness > 60 ticks (`yadventures-bosses:long_blindness`), a copy clears it and the real one
+  swaps it for 8 s of Darkness (blindness fog is a fixed ~5-block wall).
 - When hurt (`HurtTime:10s`) by a non-illager, non-creative attacker and `yadventures-bosses.cooldown` is 0:
   mirror sound, 3 s invisibility, ring of **8 real `illusioner` copies**. Cooldown 600 ticks.
 - The same happens (same cooldown) whenever its target is a survival/adventure player within 24 blocks, so a fight
   opens with illusions instead of waiting for the first hit.
+- The real Illusioner holds a Power IV bow.
 - Copies (`yadventures-bosses.illusion`): hold a bow, copy the owner's Health and Rotation, empty loot
   (`yadventures-bosses:entities/empty`), zero drop chances, same `yadventures-bosses.id` as the owner.
 - A copy vanishes when hit, after 600 ticks (`yadventures-bosses.timer`), or when no real illusioner with the

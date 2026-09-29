@@ -11,6 +11,7 @@ chance('iceologer_ambient', 0.17)
 const entity = (predicate: object) => ({ type: 'minecraft:entity_properties', entity: 'this', predicate })
 Predicate('yadventures-bosses:is_passenger', entity({ vehicle: {} }) as any)
 Predicate('yadventures-bosses:long_invisibility', entity({ effects: { 'minecraft:invisibility': { duration: { min: 61 } } } }) as any)
+Predicate('yadventures-bosses:long_blindness', entity({ effects: { 'minecraft:blindness': { duration: { min: 61 } } } }) as any)
 Predicate('yadventures-bosses:wearing_wildfire_crown', entity({
   slots: { 'armor.head': { predicates: { 'minecraft:custom_data': '{yadventures-bosses:{crown:1b}}' } } },
 }) as any)

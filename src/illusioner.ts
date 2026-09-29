@@ -4,6 +4,10 @@ import { fn } from './lib.ts'
 fn('yadventures-bosses:illusioner/tick', `
 # Replace the vanilla mirror spell with real illusions
 execute if predicate yadventures-bosses:long_invisibility run effect clear @s minecraft:invisibility
+# Vanilla blindness spell (20 s, cast once per new target): blindness fog is a 5-block wall, so copies don't blind
+# and the real one gives darkness instead
+execute if entity @s[tag=yadventures-bosses.illusion] on target if predicate yadventures-bosses:long_blindness run effect clear @s minecraft:blindness
+execute if entity @s[tag=!yadventures-bosses.illusion] on target if predicate yadventures-bosses:long_blindness run function yadventures-bosses:illusioner/darkness
 execute if entity @s[tag=yadventures-bosses.illusion] run return run function yadventures-bosses:illusioner/illusion_tick
 
 function yadventures-bosses:illusioner/escape/tick
@@ -13,6 +17,10 @@ execute if entity @s[nbt={HurtTime:10s}] run return run function yadventures-bos
 scoreboard players set #ok yadventures-bosses.dummy 0
 execute on target if entity @s[type=minecraft:player,gamemode=!creative,gamemode=!spectator,distance=..24] run scoreboard players set #ok yadventures-bosses.dummy 1
 execute if score #ok yadventures-bosses.dummy matches 1 run function yadventures-bosses:illusioner/create_illusions
+`)
+fn('yadventures-bosses:illusioner/darkness', `
+effect clear @s minecraft:blindness
+effect give @s minecraft:darkness 12 0
 `)
 fn('yadventures-bosses:illusioner/hurt', `
 scoreboard players set #ok yadventures-bosses.dummy 0
