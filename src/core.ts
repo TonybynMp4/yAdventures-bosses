@@ -9,7 +9,7 @@ const shieldRotation = range(8).map((k) => {
 })
 const OBJECTIVES = `dummy id timer cooldown health shields absorbed regen state attack_cd charge_x charge_y charge_z
   fired decoy uid target hurt cast chunk_cd slow_cd stray_cd frozen age offset velocity shield_hp home_x home_y
-  home_z wander wander_x wander_z hits hit_damage hit_window`.trim().split(/\s+/)
+  home_z wander wander_x wander_z hits hit_damage hit_window flags`.trim().split(/\s+/)
 
 const load = fn('yadventures-bosses:load', `
 # yAdventures bosses: Iceologer, Illusioner, Wildfire
@@ -43,7 +43,9 @@ execute as @e[type=minecraft:armor_stand,tag=yadventures-bosses.cabin_armor_stan
 
 # Iceologers, ice chunks and frozen players
 # Dying entities can't be selected with @e, so each boss is ticked through a passenger (it still sees the dying vehicle)
-execute as @e[type=minecraft:marker,tag=yadventures-bosses.iceologer_link] run function yadventures-bosses:iceologer/link
+execute as @e[type=minecraft:item_display,tag=yadventures-bosses.iceologer_body] on vehicle at @s run function yadventures-bosses:iceologer/tick
+kill @e[type=minecraft:item_display,tag=yadventures-bosses.iceologer_body,predicate=!yadventures-bosses:is_passenger]
+execute as @e[type=minecraft:marker,tag=yadventures-bosses.iceologer_link] at @s run function yadventures-bosses:iceologer/legacy
 execute as @e[type=minecraft:item_display,tag=yadventures-bosses.ice_chunk] at @s run function yadventures-bosses:ice_chunk/tick
 execute as @a[scores={yadventures-bosses.frozen=1..}] at @s run function yadventures-bosses:iceologer/frozen_player
 
@@ -65,7 +67,7 @@ execute as @e[type=minecraft:small_fireball,tag=!yadventures-bosses.debris] if f
 fn('yadventures-bosses:second', `
 execute store result score #difficulty yadventures-bosses.dummy run difficulty
 
-execute as @e[type=minecraft:wandering_trader,tag=yadventures-bosses.iceologer] at @s run function yadventures-bosses:iceologer/second
+execute as @e[type=minecraft:evoker,tag=yadventures-bosses.iceologer] at @s run function yadventures-bosses:iceologer/second
 execute as @a[predicate=yadventures-bosses:wearing_wildfire_crown] run function yadventures-bosses:crown/wearer
 execute as @e[tag=yadventures-bosses.leashed] run function yadventures-bosses:spawner/leash
 

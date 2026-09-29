@@ -4,7 +4,7 @@
 
 | Mob | Base entity | Where |
 |---|---|---|
-| Iceologer | invisible `wandering_trader` tagged `yadventures-bosses.iceologer`, wearing item models | Iceologer Cabin (snowy biomes) |
+| Iceologer | invisible `evoker` tagged `yadventures-bosses.iceologer`, wearing a head item and an item-display body | Iceologer Cabin (snowy biomes) |
 | Illusioner | vanilla `illusioner` with custom behaviour | Illusioner Shack, Illusioner Training Grounds (taigas) |
 | Wildfire | `blaze` scaled ×1.5625, invisible, wearing item-display models | Citadel (Nether) |
 

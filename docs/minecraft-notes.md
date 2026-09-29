@@ -76,6 +76,14 @@ datapack.wiki.
 - Wandering traders: `wander_target` (int array `[I;x,y,z]`) makes the WanderToPositionGoal walk
   there (speed ×0.35, in legs of up to 10 blocks). `DespawnDelay:0` means it never despawns.
   Base speed is 0.7.
+- A mob's home (`home_pos` + `home_radius`, radius ≥ 0 to be read) also limits targeting:
+  `TargetGoal.canAttack` rejects targets outside it. A home far below the mob (radius 1) blocks all
+  vanilla targeting while strolling and fleeing still work (they only respect a home within their range).
+- Mobs stop random strolling after 100 ticks of `noActionTime`, which counts up every tick and is reset
+  by being hurt or by a player within 32 blocks (monster category): on an empty test server nothing strolls.
+- Evokers (illager renderer) draw held items only while casting; villager-like mobs draw theirs in the
+  crossed-arms layer.
+- `data` edits to a villager reload its brain (`readAdditionalSaveData` calls `refreshBrain`).
 - Players can't be `data modify`'d (e.g. `TicksFrozen`): imitate the effect with effects, damage
   and scores.
 - `damage <target> <amount> <type> by <direct entity> from <cause>` credits the cause (hurt-by

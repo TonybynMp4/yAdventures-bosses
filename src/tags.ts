@@ -35,7 +35,7 @@ Tag('block', 'yadventures-bosses:passable', [
     light leaf_litter warped_roots crimson_roots nether_sprouts sweet_berry_bush firefly_bush`)] as any)
 Tag('block', 'yadventures-bosses:citadel_pillar_replaceable', mc('air cave_air water lava bubble_column fire soul_fire') as any)
 Tag('entity_type', 'yadventures-bosses:wildfire_allies', mc('blaze wither_skeleton') as any)
-// Mobs on the yadventures-bosses.illagers team don't attack the (wandering trader based) Iceologer
+// Mobs on the yadventures-bosses.illagers team don't target each other (or the Iceologer and its strays)
 Tag('entity_type', 'yadventures-bosses:prevent_aggression', [
   ...mc('zombie husk drowned zombie_villager'), '#minecraft:illager', ...mc('vex ravager zombified_piglin')] as any)
 Tag('entity_type', 'yadventures-bosses:iceologer_targets', mc('player iron_golem villager wandering_trader glow_squid') as any)

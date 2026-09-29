@@ -91,14 +91,28 @@ free (`vaults_x` / `vaults_z`) and the vaults face the side with open space.
 
 Port of the Friends & Foes Iceologer.
 
-**Entity:** an invisible, `Silent` `wandering_trader` tagged `yadventures-bosses.iceologer`: 36 HP, follow
-range 18, no trades, `DespawnDelay:0` (never despawns), team `yadventures-bosses.illagers`, loot
-`yadventures-bosses:entities/iceologer`. A `marker` passenger (`yadventures-bosses.iceologer_link`) drives its tick
-(see above) and is killed once it has no vehicle.
+**Entity:** an invisible, `Silent` `evoker` tagged `yadventures-bosses.iceologer`: 36 HP, follow
+range 18, `CanPickUpLoot:0b`, `CanJoinRaid:0b`, team `yadventures-bosses.illagers`, loot
+`yadventures-bosses:entities/iceologer`, 10 XP (the evoker's own). An `item_display` passenger
+(`yadventures-bosses.iceologer_body`) draws the body and drives its tick (see above); it's killed once it has no vehicle.
 
-**Model:** the head slot holds `yadventures-bosses:iceologer/head`; `armor.chest` holds
-`yadventures-bosses:iceologer/body`, copied to the mainhand every tick, where the villager crossed-arms
-layer renders it. Variants come from `custom_model_data` flags:
+**No vanilla spells:** its home is set 10000 blocks below its spawn x/z (`home_pos`, `home_radius:1`).
+`TargetGoal.canAttack` rejects targets outside the home, so the vanilla target goals (players, villagers,
+golems, retaliation) never pick one, and the fangs and vex spells, which need a target, never start. Random
+strolling and fleeing only respect a home within their range (`GoalUtils.mobRestricted`), but strolling is biased
+toward the home x/z, so it stays around its spawn. Its vanilla goals still run: it strolls (only with a player
+within 32 blocks, like every monster: `noActionTime`) and runs from survival players within 8 blocks
+(`AvoidEntityGoal`). The wololo spell (turning blue sheep red) doesn't need a target, so it still happens near
+blue sheep. Iron golems attack it (it's a monster), and Peaceful removes it.
+
+**Model:** the head slot holds `yadventures-bosses:iceologer/head`, rendered by the custom head layer (the
+illager and villager heads match). The evoker only draws held items while casting, so the body
+`yadventures-bosses:iceologer/body` is the passenger display (`item_display:"ground"`), with a
+transformation that reproduces the villager crossed-arms item pose (`BODY_POSE` in `iceologer.ts`: arms
+pose, 1.07× scale and offset of `CrossedArmsItemLayer`, seen from the passenger seat 2 blocks up and turned
+back by the display renderer's 180°). Its yaw copies the evoker's `Rotation[0]` every tick; the evoker's body
+rotation isn't readable, so the body turns with it only as it walks or turns to cast. On death it falls over
+like the evoker (three interpolated keyframes, `DEATH_POSE`). Variants come from `custom_model_data` flags:
 
 | Item | flags |
 |---|---|
@@ -109,27 +123,17 @@ layer renders it. Variants come from `custom_model_data` flags:
 - *moving*: `yadventures-bosses:moving` predicate (horizontal speed, not riding).
   The walking legs are all 9 rotations of each leg layered, and their animated textures show one
   at a time.
-- *spellcasting*: set on `armor.chest` while casting.
+- *spellcasting*: while `yadventures-bosses.cast` > 0.
 
-The wandering trader's own goals stay active. It panics when hurt, and avoids zombies and
-illagers (the team stops those from attacking it). In daylight it tries to drink milk because
-it's invisible (at night it would drink an invisibility potion, but it's already invisible). That goal
-(`UseItemGoal`, priority 0, no flags) can't be blocked. Replacing its milk with the body item stops the
-drinking (`updatingUsingItem` needs the same item), and the goal restarts it with fresh milk every other
-tick, so clients saw milk flicker in its hand. Instead, `iceologer/tick` modifies the milk in place
-(`MILK_DISGUISE`): it gets the body's `item_model`/`custom_model_data` and loses its `consumable`
-component. It's still a milk bucket, so the drinking continues and finishing does nothing. Every 32
-ticks the drink finishes and the goal restarts it with a fresh milk bucket, which `startUsingItem` sends
-to clients right away, a tick before `iceologer/tick` can disguise it. So the resource pack draws
-`milk_bucket` held by any wandering trader (`context_entity_type`) as the body. While the mainhand isn't milk, it's
-refreshed from `armor.chest` as before. `yadventures-bosses:iceologer/second` still re-applies
-invisibility, just in case.
+The flags are kept as a bit set in `yadventures-bosses.flags`, and the items are only modified when it changes.
+
+Older versions used an invisible wandering trader ridden by a `yadventures-bosses.iceologer_link` marker.
+Such a marker (`iceologer/legacy`) sets its trader to its last death tick (Health 0, `DeathTime:19`, empty loot:
+it disappears next tick without loot, XP or sound), then summons an unconverted evoker with the trader's UUID
+(the trial spawner tracks it by UUID), rotation and `ominous`/`from_spawner` tags, which converts next tick.
 
 **Every second** (`yadventures-bosses:iceologer/second`):
-- Removed on Peaceful. Ambient sound (17% chance).
-- Flee: with a survival/adventure player within 8 blocks, it gets a +100 % speed modifier
-  (`yadventures-bosses:flee`) and its `wander_target` is set 10 blocks away from the player (the trader's
-  WanderToPositionGoal walks there). Otherwise both are removed.
+- Removed on Peaceful. Ambient sound (17% chance). Re-applies invisibility, just in case.
 - Target: dropped if gone, over 18 blocks away, or a creative/spectator player. With no target, it
   picks the nearest player within 16 blocks in line of sight, else the nearest iron golem,
   villager, wandering trader or glow squid. Line of sight is a 0.5-block raycast
@@ -178,12 +182,13 @@ invisibility, just in case.
 - Killed at age 400 as a safety net.
 
 **Death** (`Health ≤ 0`, seen through the passenger): tag `yadventures-bosses.dead`, death sound, hurt
-tint, and a 10-XP orb when a player killed it.
+tint, and the body's fall.
 
 Every tick, `#yadventures-bosses:prevent_aggression` mobs without a team join `yadventures-bosses.illagers`
 (friendly fire off). Mobs on the same team never target each other or avoid each other (`TargetingConditions`
-checks `isAlliedTo`), so zombies and illagers don't attack the Iceologer and it doesn't run from them.
-A mob on no team targets it in the first second after spawning, which is why this runs every tick.
+checks `isAlliedTo`). This dates from the wandering trader Iceologer, which zombies and illagers attacked;
+the evoker isn't their target anyway, and the team keeps its strays' arrows off it.
+A mob on no team targets its prey in the first second after spawning, which is why this runs every tick.
 
 ## Ring of copies (`yadventures-bosses:util/*`, shared)
 
@@ -311,11 +316,11 @@ and award hearts:
 | `yadventures-bosses.home_x`, `home_y`, `home_z` | spawner bosses' leash position |
 | `yadventures-bosses.state`, `yadventures-bosses.attack_cd`, `yadventures-bosses.charge_x/y/z`, `yadventures-bosses.fired`, `yadventures-bosses.wander`, `yadventures-bosses.wander_x/z` | wildfire AI (`state` is also the Iceologer's current spell) |
 | `yadventures-bosses.uid`, `yadventures-bosses.target` | Iceologer / ice chunk targets (`#next yadventures-bosses.uid` = counter) |
-| `yadventures-bosses.hurt`, `yadventures-bosses.cast`, `yadventures-bosses.chunk_cd`, `yadventures-bosses.slow_cd`, `yadventures-bosses.stray_cd` | Iceologer: last HurtTime, cast tick, spell cooldowns (seconds) |
+| `yadventures-bosses.hurt`, `yadventures-bosses.flags`, `yadventures-bosses.cast`, `yadventures-bosses.chunk_cd`, `yadventures-bosses.slow_cd`, `yadventures-bosses.stray_cd` | Iceologer: last HurtTime, model flags (bit set), cast tick, spell cooldowns (seconds); `timer` counts its death ticks |
 | `yadventures-bosses.age`, `yadventures-bosses.offset`, `yadventures-bosses.velocity` | ice chunk |
 | `yadventures-bosses.frozen` | players' imitation freezing (ticks left) |
 
 Storage `yadventures-bosses:data`: `shield_rotation`, and scratch space for macros (`ring`, `aim`, `blaze`,
-`brew`, `spin`, `shields`).
+`brew`, `spin`, `shields`, `legacy`).
 
 Team `yadventures-bosses.illagers` (friendly fire off): the Iceologer and `#yadventures-bosses:prevent_aggression` mobs.
