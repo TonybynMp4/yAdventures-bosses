@@ -1,8 +1,9 @@
 import { fn } from './lib.ts'
 
 // ============================================================ iceologer
-// An invisible wandering trader wearing the model: the head item renders on its head and the mainhand
-// item (refreshed from armor.chest every tick) renders in the crossed-arms layer.
+// An invisible wandering trader wearing the model: the head item renders on its head and the body is an
+// item_display passenger posed like the trader's crossed-arms item (its hand is taken by the milk it drinks,
+// see iceologer/tick). The passenger also drives the tick.
 // custom_model_data flags: head [hurt], body [hurt, moving, spellcasting]
 // yadventures-bosses.state: spell being cast (1 = ice chunk, 2 = slowness, 3 = summon strays). Targets are remembered by their yadventures-bosses.uid.
 const flags = (values: boolean[], offset = 0) => JSON.stringify({
@@ -16,31 +17,54 @@ const ICE_HEAD = '{id:"minecraft:stone",count:1,components:{"minecraft:item_mode
 const ICE_BODY = '{id:"minecraft:stone",count:1,components:{"minecraft:item_model":"yadventures-bosses:iceologer/body","minecraft:custom_model_data":{flags:[0b,0b,0b]}}}'
 export const NO_DROPS = 'drop_chances:{mainhand:0f,offhand:0f,head:0f,chest:0f,legs:0f,feet:0f}'
 export const INVISIBLE = 'active_effects:[{id:"minecraft:invisibility",duration:-1,amplifier:0b,show_particles:0b}]'
+// The villager renderer's pose for its crossed-arms item (arms at 1.07x, 0.13/-0.34 in, flipped), seen from the
+// passenger seat 1.95 blocks up (the item_display renderer turns the item 180°), with the "ground" item transform.
+// DEATH_POSE: the same after the vanilla death tilt (90° around the body's z axis), the vanilla fall at 45°/75°/90°.
+const bodyPose = (translation: string, rotation: string) =>
+  `transformation:{translation:[${translation}],left_rotation:[${rotation}],scale:[1.0031f,1.0031f,1.0031f],right_rotation:[0f,0f,0f,1f]}`
+const BODY_POSE = bodyPose('0f,-0.849f,0.3997f', '0f,1f,0f,0f')
+const DEATH_POSE = [
+  bodyPose('0.7785f,-1.1715f,0.3997f', '0.3827f,0.9239f,0f,0f'),
+  bodyPose('1.0635f,-1.665f,0.3997f', '0.6088f,0.7934f,0f,0f'),
+  bodyPose('1.101f,-1.95f,0.3997f', '0.7071f,0.7071f,0f,0f'),
+]
+const BODY = 'on passengers if entity @s[type=minecraft:item_display,tag=yadventures-bosses.iceologer_body]'
 fn('yadventures-bosses:convert/iceologer', `
 # An invisible wandering trader wearing item models
-data merge entity @s {CustomName:{"translate":"entity.yadventures-bosses.iceologer"},Silent:1b,PersistenceRequired:1b,DespawnDelay:0,DeathLootTable:"yadventures-bosses:entities/iceologer",Offers:{Recipes:[]},${INVISIBLE},${NO_DROPS},equipment:{head:${ICE_HEAD},mainhand:${ICE_BODY},chest:${ICE_BODY}}}
+data merge entity @s {CustomName:{"translate":"entity.yadventures-bosses.iceologer"},Silent:1b,PersistenceRequired:1b,DespawnDelay:0,DeathLootTable:"yadventures-bosses:entities/iceologer",Offers:{Recipes:[]},${INVISIBLE},${NO_DROPS},equipment:{head:${ICE_HEAD}}}
 tag @s add yadventures-bosses.iceologer
 tag @s add yadventures.boss.iceologer
 team join yadventures-bosses.illagers @s
 attribute @s minecraft:follow_range base set 18
 attribute @s minecraft:max_health base set 36
-summon minecraft:marker ~ ~ ~ {Tags:["yadventures-bosses.iceologer_link","yadventures-bosses.new"]}
-ride @n[type=minecraft:marker,tag=yadventures-bosses.new,distance=..1] mount @s
-tag @e[type=minecraft:marker,tag=yadventures-bosses.new,distance=..1] remove yadventures-bosses.new
+function yadventures-bosses:iceologer/add_body
 function yadventures-bosses:iceologer/init
+`)
+fn('yadventures-bosses:iceologer/add_body', `
+summon minecraft:item_display ~ ~ ~ {Tags:["yadventures-bosses.iceologer_body","yadventures-bosses.new"],teleport_duration:1,item_display:"ground",item:${ICE_BODY},${BODY_POSE}}
+ride @n[type=minecraft:item_display,tag=yadventures-bosses.new,distance=..1] mount @s
+tag @e[type=minecraft:item_display,tag=yadventures-bosses.new,distance=..1] remove yadventures-bosses.new
 `)
 fn('yadventures-bosses:iceologer/init', `
 scoreboard players add #next yadventures-bosses.id 1
 scoreboard players operation @s yadventures-bosses.id = #next yadventures-bosses.id
 scoreboard players set @s yadventures-bosses.hurt 0
+scoreboard players set @s yadventures-bosses.flags 0
 scoreboard players set @s yadventures-bosses.cast 0
 scoreboard players set @s yadventures-bosses.chunk_cd 0
 scoreboard players set @s yadventures-bosses.slow_cd 0
 scoreboard players set @s yadventures-bosses.stray_cd 10
 `)
+// Iceologers from older versions were ticked through a marker passenger and wore the body in their hands
 fn('yadventures-bosses:iceologer/link', `
-execute unless predicate yadventures-bosses:is_passenger run return run kill @s
-execute on vehicle at @s run function yadventures-bosses:iceologer/tick
+execute on vehicle at @s run function yadventures-bosses:iceologer/upgrade
+kill @s
+`)
+fn('yadventures-bosses:iceologer/upgrade', `
+item replace entity @s weapon.mainhand with minecraft:air
+item replace entity @s armor.chest with minecraft:air
+scoreboard players set @s yadventures-bosses.flags 0
+execute unless entity @s[tag=yadventures-bosses.dead] run function yadventures-bosses:iceologer/add_body
 `)
 fn('yadventures-bosses:util/uid', `
 # Gives @s a permanent target id and puts it in #uid
@@ -56,19 +80,17 @@ execute as @e[scores={yadventures-bosses.uid=1..},distance=..64] if score @s yad
 `)
 
 // The wandering trader's "drink milk while invisible in daylight" goal can't be removed: it puts a milk bucket
-// in the mainhand and drinks it, then restarts. Replacing that milk with the body item would make it stop and
-// restart every other tick (flickering milk), so the milk is modified in place instead: it looks like the body
-// and has no consumable component, so drinking it does nothing and leaves it in the hand. The goal still restarts
-// with a fresh milk bucket every 32 ticks, which clients see for a tick: the resource pack draws milk held by a
-// wandering trader as the body too.
-const MILK_DISGUISE = '{type:"minecraft:set_components",components:{"minecraft:item_model":"yadventures-bosses:iceologer/body","minecraft:custom_model_data":{flags:[0b,0b,0b]},"!minecraft:consumable":{}}}'
+// in the mainhand and drinks it, then restarts. The milk is modified in place: it has no consumable component,
+// so drinking it does nothing, and draws nothing. Taking it away instead would make the goal stop and restart
+// every other tick. The goal still restarts with a fresh milk bucket every 32 ticks, which clients see for a
+// tick: the resource pack draws milk held by a wandering trader as nothing too.
+const MILK_DISGUISE = '{type:"minecraft:set_components",components:{"minecraft:item_model":"yadventures-bosses:empty","!minecraft:consumable":{}}}'
 fn('yadventures-bosses:iceologer/tick', `
-execute if entity @s[tag=yadventures-bosses.dead] if items entity @s weapon.mainhand minecraft:milk_bucket[minecraft:consumable] run item modify entity @s weapon.mainhand [${MILK_DISGUISE},${flags([true, false, false])}]
-execute if entity @s[tag=yadventures-bosses.dead] run return fail
-execute unless items entity @s weapon.mainhand minecraft:milk_bucket run item replace entity @s weapon.mainhand from entity @s armor.chest
-execute if items entity @s weapon.mainhand minecraft:milk_bucket run item modify entity @s weapon.mainhand ${MILK_DISGUISE}
-execute if score @s yadventures-bosses.cast matches 1.. if items entity @s weapon.mainhand minecraft:milk_bucket run item modify entity @s weapon.mainhand ${flags([true], 2)}
-item modify entity @s[predicate=yadventures-bosses:moving] weapon.mainhand ${flags([true], 1)}
+execute if items entity @s weapon.mainhand minecraft:milk_bucket[minecraft:consumable] run item modify entity @s weapon.mainhand ${MILK_DISGUISE}
+execute if entity @s[tag=yadventures-bosses.dead] run return run function yadventures-bosses:iceologer/dying
+# The body faces where the trader faces (its body rotation isn't readable: it lags behind when it turns in place)
+execute store result score #yaw yadventures-bosses.dummy run data get entity @s Rotation[0] 100
+execute ${BODY} store result entity @s Rotation[0] float 0.01 run scoreboard players get #yaw yadventures-bosses.dummy
 execute store result score #hp yadventures-bosses.dummy run data get entity @s Health 100
 execute if score #hp yadventures-bosses.dummy matches ..0 run return run function yadventures-bosses:iceologer/death
 
@@ -76,11 +98,21 @@ execute if score #hp yadventures-bosses.dummy matches ..0 run return run functio
 execute store result score #hurt yadventures-bosses.dummy run data get entity @s HurtTime
 execute if score #hurt yadventures-bosses.dummy > @s yadventures-bosses.hurt run function yadventures-bosses:iceologer/hurt
 scoreboard players operation @s yadventures-bosses.hurt = #hurt yadventures-bosses.dummy
-execute if score #hurt yadventures-bosses.dummy matches 1.. run item modify entity @s weapon.mainhand ${HURT_ON}
-execute if score #hurt yadventures-bosses.dummy matches 1.. run item modify entity @s armor.head ${HURT_ON}
-execute if score #hurt yadventures-bosses.dummy matches 0 run item modify entity @s armor.head ${HURT_OFF}
+
+# Model flags as a bit set (1 hurt, 2 moving, 4 spellcasting), items updated when it changes
+scoreboard players set #f yadventures-bosses.dummy 0
+execute if score #hurt yadventures-bosses.dummy matches 1.. run scoreboard players add #f yadventures-bosses.dummy 1
+execute if predicate yadventures-bosses:moving run scoreboard players add #f yadventures-bosses.dummy 2
+execute if score @s yadventures-bosses.cast matches 1.. run scoreboard players add #f yadventures-bosses.dummy 4
+execute unless score @s yadventures-bosses.flags = #f yadventures-bosses.dummy run function yadventures-bosses:iceologer/set_flags
 
 execute if score @s yadventures-bosses.cast matches 1.. run function yadventures-bosses:iceologer/cast/tick
+`)
+fn('yadventures-bosses:iceologer/set_flags', `
+scoreboard players operation @s yadventures-bosses.flags = #f yadventures-bosses.dummy
+${Array.from({ length: 8 }, (_, f) => `execute if score #f yadventures-bosses.dummy matches ${f} ${BODY} run item modify entity @s contents ${flags([1, 2, 4].map((bit) => (f & bit) > 0))}`).join('\n')}
+execute if score #hurt yadventures-bosses.dummy matches 0 run item modify entity @s armor.head ${HURT_OFF}
+execute if score #hurt yadventures-bosses.dummy matches 1.. run item modify entity @s armor.head ${HURT_ON}
 `)
 fn('yadventures-bosses:iceologer/hurt', `
 playsound yadventures-bosses:entity.iceologer.hurt hostile @a ~ ~ ~ 1 1
@@ -93,8 +125,15 @@ fn('yadventures-bosses:iceologer/death', `
 tag @s add yadventures-bosses.dead
 playsound yadventures-bosses:entity.iceologer.death hostile @a ~ ~ ~ 1 1
 item modify entity @s armor.head ${HURT_ON}
-item modify entity @s weapon.mainhand ${flags([true, false, false])}
+execute ${BODY} run item modify entity @s contents ${flags([true, false, false])}
 execute on attacker if entity @s[type=minecraft:player] run summon minecraft:experience_orb ~ ~ ~ {Value:10s}
+scoreboard players set @s yadventures-bosses.timer 0
+execute ${BODY} run data merge entity @s {start_interpolation:0,interpolation_duration:3,${DEATH_POSE[0]}}
+`)
+fn('yadventures-bosses:iceologer/dying', `
+scoreboard players add @s yadventures-bosses.timer 1
+execute if score @s yadventures-bosses.timer matches 3 ${BODY} run data merge entity @s {start_interpolation:0,interpolation_duration:4,${DEATH_POSE[1]}}
+execute if score @s yadventures-bosses.timer matches 7 ${BODY} run data merge entity @s {start_interpolation:0,interpolation_duration:5,${DEATH_POSE[2]}}
 `)
 
 fn('yadventures-bosses:iceologer/second', `
@@ -188,7 +227,6 @@ execute if score #spell yadventures-bosses.dummy matches 2 run playsound yadvent
 execute if score #spell yadventures-bosses.dummy matches 3 run scoreboard players set @s yadventures-bosses.stray_cd 24
 execute if score #spell yadventures-bosses.dummy matches 3 if entity @s[tag=yadventures-bosses.ominous] run scoreboard players set @s yadventures-bosses.stray_cd 16
 execute if score #spell yadventures-bosses.dummy matches 3 run playsound yadventures-bosses:entity.iceologer.prepare_summon hostile @a ~ ~ ~ 1 1
-item modify entity @s armor.chest ${flags([true], 2)}
 attribute @s minecraft:movement_speed modifier add yadventures-bosses:casting -1 add_multiplied_total
 `)
 const SPELL_COLORS = ['0.4,0.3,0.35', '0.1,0.1,0.2', '0.7,0.85,0.95']
@@ -250,7 +288,6 @@ particle minecraft:poof ~ ~1 ~ 0.3 0.5 0.3 0.02 8
 `)
 fn('yadventures-bosses:iceologer/cast/end', `
 scoreboard players set @s yadventures-bosses.cast 0
-item modify entity @s armor.chest ${flags([false], 2)}
 attribute @s minecraft:movement_speed modifier remove yadventures-bosses:casting
 `)
 

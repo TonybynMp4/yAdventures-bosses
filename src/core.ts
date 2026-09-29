@@ -7,7 +7,7 @@ const shieldRotation = range(8).map((k) => {
   const a = (k * 22.5 * Math.PI) / 180
   return [0, round6(-Math.sin(a)), 0, round6(Math.cos(a))]
 })
-const OBJECTIVES = `dummy id timer cooldown health shields absorbed regen state attack_cd charge_x charge_y charge_z
+const OBJECTIVES = `dummy id flags timer cooldown health shields absorbed regen state attack_cd charge_x charge_y charge_z
   fired decoy uid target hurt cast chunk_cd slow_cd stray_cd frozen age offset velocity shield_hp home_x home_y
   home_z wander wander_x wander_z hits hit_damage hit_window`.trim().split(/\s+/)
 
@@ -43,6 +43,8 @@ execute as @e[type=minecraft:armor_stand,tag=yadventures-bosses.cabin_armor_stan
 
 # Iceologers, ice chunks and frozen players
 # Dying entities can't be selected with @e, so each boss is ticked through a passenger (it still sees the dying vehicle)
+execute as @e[type=minecraft:item_display,tag=yadventures-bosses.iceologer_body] on vehicle at @s run function yadventures-bosses:iceologer/tick
+kill @e[type=minecraft:item_display,tag=yadventures-bosses.iceologer_body,predicate=!yadventures-bosses:is_passenger]
 execute as @e[type=minecraft:marker,tag=yadventures-bosses.iceologer_link] run function yadventures-bosses:iceologer/link
 execute as @e[type=minecraft:item_display,tag=yadventures-bosses.ice_chunk] at @s run function yadventures-bosses:ice_chunk/tick
 execute as @a[scores={yadventures-bosses.frozen=1..}] at @s run function yadventures-bosses:iceologer/frozen_player

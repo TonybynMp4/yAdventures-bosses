@@ -93,12 +93,16 @@ Port of the Friends & Foes Iceologer.
 
 **Entity:** an invisible, `Silent` `wandering_trader` tagged `yadventures-bosses.iceologer`: 36 HP, follow
 range 18, no trades, `DespawnDelay:0` (never despawns), team `yadventures-bosses.illagers`, loot
-`yadventures-bosses:entities/iceologer`. A `marker` passenger (`yadventures-bosses.iceologer_link`) drives its tick
-(see above) and is killed once it has no vehicle.
+`yadventures-bosses:entities/iceologer`. Its body, an `item_display` passenger
+(`yadventures-bosses.iceologer_body`), drives its tick (see above) and is killed once it has no vehicle.
+Older versions used a `marker` passenger (`yadventures-bosses.iceologer_link`) and wore the body in their
+hands: `iceologer/link` empties the hands, adds the body and kills the marker.
 
-**Model:** the head slot holds `yadventures-bosses:iceologer/head`; `armor.chest` holds
-`yadventures-bosses:iceologer/body`, copied to the mainhand every tick, where the villager crossed-arms
-layer renders it. Variants come from `custom_model_data` flags:
+**Model:** the head slot holds `yadventures-bosses:iceologer/head` (the custom head layer renders it). The
+body passenger displays `yadventures-bosses:iceologer/body` (`item_display:"ground"`), with a transformation
+that reproduces the villager crossed-arms item layer from the passenger seat 1.95 blocks up; its yaw follows the
+trader's `Rotation[0]` every tick (the trader's body rotation isn't readable, so it lags behind when it
+turns in place). Variants come from `custom_model_data` flags:
 
 | Item | flags |
 |---|---|
@@ -109,21 +113,22 @@ layer renders it. Variants come from `custom_model_data` flags:
 - *moving*: `yadventures-bosses:moving` predicate (horizontal speed, not riding).
   The walking legs are all 9 rotations of each leg layered, and their animated textures show one
   at a time.
-- *spellcasting*: set on `armor.chest` while casting.
+- *spellcasting*: while casting.
+
+The flags are kept as a bit set in `yadventures-bosses.flags`, and the items are only modified when it changes.
 
 The wandering trader's own goals stay active. It panics when hurt, and avoids zombies and
 illagers (the team stops those from attacking it). In daylight it tries to drink milk because
 it's invisible (at night it would drink an invisibility potion, but it's already invisible). That goal
-(`UseItemGoal`, priority 0, no flags) can't be blocked. Replacing its milk with the body item stops the
-drinking (`updatingUsingItem` needs the same item), and the goal restarts it with fresh milk every other
-tick, so clients saw milk flicker in its hand. Instead, `iceologer/tick` modifies the milk in place
-(`MILK_DISGUISE`): it gets the body's `item_model`/`custom_model_data` and loses its `consumable`
-component. It's still a milk bucket, so the drinking continues and finishing does nothing. Every 32
-ticks the drink finishes and the goal restarts it with a fresh milk bucket, which `startUsingItem` sends
-to clients right away, a tick before `iceologer/tick` can disguise it. So the resource pack draws
-`milk_bucket` held by any wandering trader (`context_entity_type`) as the body. While the mainhand isn't milk, it's
-refreshed from `armor.chest` as before. `yadventures-bosses:iceologer/second` still re-applies
-invisibility, just in case.
+(`UseItemGoal`, priority 0, no flags) can't be blocked, and it holds the milk in the mainhand, which
+is why the body isn't a held item. Taking the milk away stops the drinking (`updatingUsingItem` needs the
+same item), and the goal restarts it with fresh milk every other tick. Instead, `iceologer/tick` modifies the
+milk in place (`MILK_DISGUISE`): it gets the `yadventures-bosses:empty` item model (draws nothing) and loses
+its `consumable` component. It's still a milk bucket, so the drinking continues and finishing does nothing.
+Every 32 ticks the drink finishes and the goal restarts it with a fresh milk bucket, which `startUsingItem`
+sends to clients right away, a tick before `iceologer/tick` can disguise it. So the resource pack draws
+`milk_bucket` held by any wandering trader (`context_entity_type`) as nothing too.
+`yadventures-bosses:iceologer/second` still re-applies invisibility, just in case.
 
 **Every second** (`yadventures-bosses:iceologer/second`):
 - Removed on Peaceful. Ambient sound (17% chance).
@@ -178,7 +183,9 @@ invisibility, just in case.
 - Killed at age 400 as a safety net.
 
 **Death** (`Health ≤ 0`, seen through the passenger): tag `yadventures-bosses.dead`, death sound, hurt
-tint, and a 10-XP orb when a player killed it.
+tint, and a 10-XP orb when a player killed it. The body falls over like a vanilla mob (tilted by
+min(1, sqrt((DeathTime − 1) / 20 × 1.6)) × 90°): three interpolated transformation keyframes (45°, 75°, 90°),
+timed by `yadventures-bosses.timer` (`iceologer/dying`).
 
 Every tick, `#yadventures-bosses:prevent_aggression` mobs without a team join `yadventures-bosses.illagers`
 (friendly fire off). Mobs on the same team never target each other or avoid each other (`TargetingConditions`
@@ -311,7 +318,7 @@ and award hearts:
 | `yadventures-bosses.home_x`, `home_y`, `home_z` | spawner bosses' leash position |
 | `yadventures-bosses.state`, `yadventures-bosses.attack_cd`, `yadventures-bosses.charge_x/y/z`, `yadventures-bosses.fired`, `yadventures-bosses.wander`, `yadventures-bosses.wander_x/z` | wildfire AI (`state` is also the Iceologer's current spell) |
 | `yadventures-bosses.uid`, `yadventures-bosses.target` | Iceologer / ice chunk targets (`#next yadventures-bosses.uid` = counter) |
-| `yadventures-bosses.hurt`, `yadventures-bosses.cast`, `yadventures-bosses.chunk_cd`, `yadventures-bosses.slow_cd`, `yadventures-bosses.stray_cd` | Iceologer: last HurtTime, cast tick, spell cooldowns (seconds) |
+| `yadventures-bosses.hurt`, `yadventures-bosses.flags`, `yadventures-bosses.cast`, `yadventures-bosses.chunk_cd`, `yadventures-bosses.slow_cd`, `yadventures-bosses.stray_cd` | Iceologer: last HurtTime, model flags, cast tick, spell cooldowns (seconds) |
 | `yadventures-bosses.age`, `yadventures-bosses.offset`, `yadventures-bosses.velocity` | ice chunk |
 | `yadventures-bosses.frozen` | players' imitation freezing (ticks left) |
 

@@ -84,12 +84,13 @@ const iceBody = {
   ],
 }
 itemDef('yadventures-bosses:iceologer/body', iceBody)
-// The Iceologer's wandering trader briefly holds a plain milk bucket each time it restarts drinking (see
-// iceologer.ts): draw milk held by any wandering trader as the body. Vanilla traders only hold milk while
-// drinking it invisible at dawn, where this shows a floating body instead of a floating bucket.
+// Draws nothing: the Iceologer's (invisible) wandering trader holds disguised milk (see iceologer.ts)
+itemDef('yadventures-bosses:empty', { type: 'minecraft:empty' })
+// It briefly holds a plain milk bucket each time it restarts drinking: draw milk held by any wandering trader as
+// nothing too. Vanilla traders only hold milk while drinking it invisible at dawn, where it hides a floating bucket.
 itemDef('minecraft:milk_bucket', {
   type: 'minecraft:select', property: 'minecraft:context_entity_type',
-  cases: [{ when: 'minecraft:wandering_trader', model: iceBody }],
+  cases: [{ when: 'minecraft:wandering_trader', model: { type: 'minecraft:empty' } }],
   fallback: modelRef('minecraft:item/milk_bucket'),
 })
 
