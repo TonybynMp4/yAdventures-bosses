@@ -217,10 +217,22 @@ execute if score @s yadventures-bosses.timer matches 20 run function yadventures
 execute if score @s yadventures-bosses.timer matches 20 ${BODY} {interpolation_duration:4,transformation:{translation:[0f,-2.0625f,0f]}}
 execute if score @s yadventures-bosses.timer matches 24.. run function yadventures-bosses:wildfire/shockwave/end
 `)
+// It hovers (and a charge can end in mid-air), so the blast hits the ground below it: up to 8 blocks down
 fn('yadventures-bosses:wildfire/shockwave/blast', `
-execute as @e[distance=..7,type=!#yadventures-bosses:wildfire_allies,tag=!yadventures-bosses.wildfire_part] if data entity @s Health run damage @s 8 minecraft:mob_attack by @n[type=minecraft:blaze,tag=yadventures-bosses.this]
+scoreboard players set #depth yadventures-bosses.dummy 0
+function yadventures-bosses:wildfire/shockwave/ground
+`)
+fn('yadventures-bosses:wildfire/shockwave/ground', `
+execute unless block ~ ~-0.5 ~ #yadventures-bosses:passable run return run function yadventures-bosses:wildfire/shockwave/hit
+scoreboard players add #depth yadventures-bosses.dummy 1
+execute if score #depth yadventures-bosses.dummy matches 8.. run return run function yadventures-bosses:wildfire/shockwave/hit
+execute positioned ~ ~-1 ~ run function yadventures-bosses:wildfire/shockwave/ground
+`)
+fn('yadventures-bosses:wildfire/shockwave/hit', `
+execute as @e[distance=..7,type=!#yadventures-bosses:wildfire_allies,tag=!yadventures-bosses.wildfire_part] if data entity @s Health run damage @s 16 minecraft:mob_attack by @n[type=minecraft:blaze,tag=yadventures-bosses.this]
 function yadventures-bosses:wildfire/shockwave/particles
-playsound minecraft:entity.generic.explode hostile @a ~ ~ ~ 0.6 1.4
+particle minecraft:explosion ~ ~0.5 ~ 1 0.2 1 0 4 force
+playsound minecraft:entity.generic.explode hostile @a ~ ~ ~ 1 1.2
 `)
 const lines: string[] = []
 for (const i of range(48)) {
@@ -278,7 +290,7 @@ execute positioned ~ ~1.4 ~ as @e[distance=..2.2,type=!#yadventures-bosses:wildf
 execute if score #hit yadventures-bosses.dummy matches 1 run function yadventures-bosses:wildfire/charge/end
 `)
 fn('yadventures-bosses:wildfire/charge/hit', `
-damage @s 10 minecraft:mob_attack by @n[type=minecraft:blaze,tag=yadventures-bosses.this]
+damage @s 20 minecraft:mob_attack by @n[type=minecraft:blaze,tag=yadventures-bosses.this]
 scoreboard players set #hit yadventures-bosses.dummy 1
 `)
 fn('yadventures-bosses:wildfire/charge/end', `

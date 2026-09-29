@@ -9,7 +9,7 @@ const shieldRotation = range(8).map((k) => {
 })
 const OBJECTIVES = `dummy id timer cooldown health shields absorbed regen state attack_cd charge_x charge_y charge_z
   fired decoy uid target hurt cast chunk_cd slow_cd stray_cd frozen age offset velocity shield_hp home_x home_y
-  home_z wander wander_x wander_z`.trim().split(/\s+/)
+  home_z wander wander_x wander_z hits hit_damage hit_window`.trim().split(/\s+/)
 
 const load = fn('yadventures-bosses:load', `
 # yAdventures bosses: Iceologer, Illusioner, Wildfire
@@ -121,7 +121,7 @@ execute if predicate yadventures-bosses:chance/third run item replace entity @s 
 `)
 
 // ============================================================ ring of illusions (shared by illusioner + totem)
-// #mode: 0 = illusioner, 1 = player. #tp = index of the point the caster teleports to.
+// #mode: 0 = illusioner, 1 = player, 2 = teleport only (illusioner escape). #tp = index of the point the caster teleports to.
 fn('yadventures-bosses:util/ring', `
 $execute rotated $(yaw) 0 run function yadventures-bosses:util/ring_points
 `)
@@ -148,6 +148,7 @@ execute if score #depth yadventures-bosses.dummy matches ..16 positioned ~ ~${dy
 fn('yadventures-bosses:util/ring_action', `
 scoreboard players set #found yadventures-bosses.dummy 1
 execute if score #i yadventures-bosses.dummy = #tp yadventures-bosses.dummy run return run function yadventures-bosses:util/ring_teleport
+execute if score #mode yadventures-bosses.dummy matches 2 run return 0
 execute if score #mode yadventures-bosses.dummy matches 0 run return run function yadventures-bosses:illusioner/summon_illusion
 function yadventures-bosses:totem/summon_illusion
 `)

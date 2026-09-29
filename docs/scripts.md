@@ -113,3 +113,7 @@ After saving, check the file before copying it in: a save can lose or duplicate 
 - Opened chests/barrels lose their `LootTable`.
 - Vaults keep `server_data.state_updating_resumes_at` (a game time): in a younger world they stay
   inactive until then. Remove `server_data` and `shared_data`.
+- Loading places nothing at structure-void positions, so they're saved back as **air**, and air in a
+  structure file replaces the terrain it generates in (holes in the ground). Before saving, run
+  `fill <from> <to> structure_void replace air` over the parts that should keep the terrain (the
+  ground layer, outside the walls), or remove the air entries that were voids in the previous file.

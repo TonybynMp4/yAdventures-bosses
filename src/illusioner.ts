@@ -6,6 +6,7 @@ fn('yadventures-bosses:illusioner/tick', `
 execute if predicate yadventures-bosses:long_invisibility run effect clear @s minecraft:invisibility
 execute if entity @s[tag=yadventures-bosses.illusion] run return run function yadventures-bosses:illusioner/illusion_tick
 
+function yadventures-bosses:illusioner/escape/tick
 execute if score @s yadventures-bosses.cooldown matches 1.. run return run scoreboard players remove @s yadventures-bosses.cooldown 1
 execute if entity @s[nbt={HurtTime:10s}] run return run function yadventures-bosses:illusioner/hurt
 # Also splits as soon as it locks onto a survival player, so the fight opens with illusions
@@ -24,6 +25,8 @@ scoreboard players set @s[tag=yadventures-bosses.ominous] yadventures-bosses.coo
 playsound minecraft:entity.illusioner.mirror_move hostile @a ~ ~ ~ 1 1
 particle minecraft:cloud ~ ~1 ~ 0.5 1 0.5 0.05 30
 effect give @s minecraft:invisibility 3 0 true
+scoreboard players set @s yadventures-bosses.hits 0
+scoreboard players set @s yadventures-bosses.hit_damage 0
 scoreboard players set #mode yadventures-bosses.dummy 0
 tag @s add yadventures-bosses.this
 function yadventures-bosses:util/start_ring
@@ -50,4 +53,54 @@ scoreboard players operation #id yadventures-bosses.dummy = @s yadventures-bosse
 scoreboard players set #ok yadventures-bosses.dummy 0
 execute as @e[type=minecraft:illusioner,tag=!yadventures-bosses.illusion,distance=..64] if score @s yadventures-bosses.id = #id yadventures-bosses.dummy run scoreboard players set #ok yadventures-bosses.dummy 1
 execute if score #ok yadventures-bosses.dummy matches 0 run function yadventures-bosses:util/vanish
+`)
+
+// ---- escape: cornered while its copies are up (on cooldown), 2 hits within 3 s or 8+ damage in that window
+// make it swap places with one of its copies (or, with none left, teleport to a point of a 9-block ring)
+fn('yadventures-bosses:illusioner/escape/tick', `
+execute if score @s yadventures-bosses.hit_window matches 1.. run scoreboard players remove @s yadventures-bosses.hit_window 1
+execute unless score @s yadventures-bosses.hit_window matches 1.. run scoreboard players set @s yadventures-bosses.hits 0
+execute unless score @s yadventures-bosses.hit_window matches 1.. run scoreboard players set @s yadventures-bosses.hit_damage 0
+execute store result score #hp yadventures-bosses.dummy run data get entity @s Health 100
+execute unless score @s yadventures-bosses.health matches 1.. run scoreboard players operation @s yadventures-bosses.health = #hp yadventures-bosses.dummy
+execute if entity @s[nbt={HurtTime:10s}] run function yadventures-bosses:illusioner/escape/hit
+scoreboard players operation @s yadventures-bosses.health = #hp yadventures-bosses.dummy
+`)
+fn('yadventures-bosses:illusioner/escape/hit', `
+scoreboard players set #ok yadventures-bosses.dummy 0
+execute on attacker unless entity @s[type=#minecraft:illager] unless entity @s[type=minecraft:player,gamemode=creative] run scoreboard players set #ok yadventures-bosses.dummy 1
+execute if score #ok yadventures-bosses.dummy matches 0 run return fail
+scoreboard players add @s yadventures-bosses.hits 1
+scoreboard players operation #d yadventures-bosses.dummy = @s yadventures-bosses.health
+scoreboard players operation #d yadventures-bosses.dummy -= #hp yadventures-bosses.dummy
+execute if score #d yadventures-bosses.dummy matches 1.. run scoreboard players operation @s yadventures-bosses.hit_damage += #d yadventures-bosses.dummy
+scoreboard players set @s yadventures-bosses.hit_window 60
+execute unless score @s yadventures-bosses.cooldown matches 1.. run return fail
+execute if score @s yadventures-bosses.hits matches 2.. run return run function yadventures-bosses:illusioner/escape/run
+execute if score @s yadventures-bosses.hit_damage matches 800.. run function yadventures-bosses:illusioner/escape/run
+`)
+fn('yadventures-bosses:illusioner/escape/run', `
+scoreboard players set @s yadventures-bosses.hits 0
+scoreboard players set @s yadventures-bosses.hit_damage 0
+scoreboard players set @s yadventures-bosses.hit_window 0
+playsound minecraft:entity.illusioner.mirror_move hostile @a ~ ~ ~ 1 1.2
+particle minecraft:cloud ~ ~1 ~ 0.3 0.6 0.3 0.05 16
+effect give @s minecraft:invisibility 1 0 true
+scoreboard players operation #id yadventures-bosses.dummy = @s yadventures-bosses.id
+execute as @e[type=minecraft:illusioner,tag=yadventures-bosses.illusion,distance=..32] if score @s yadventures-bosses.id = #id yadventures-bosses.dummy run tag @s add yadventures-bosses.candidate
+execute if entity @e[type=minecraft:illusioner,tag=yadventures-bosses.candidate] run return run function yadventures-bosses:illusioner/escape/swap
+scoreboard players set #mode yadventures-bosses.dummy 2
+execute store result score #tp yadventures-bosses.dummy run random value 1..9
+execute store result storage yadventures-bosses:data ring.yaw int 1 run random value 0..359
+function yadventures-bosses:util/ring with storage yadventures-bosses:data ring
+`)
+fn('yadventures-bosses:illusioner/escape/swap', `
+tag @e[type=minecraft:illusioner,tag=yadventures-bosses.candidate,sort=random,limit=1] add yadventures-bosses.swap
+tag @e[type=minecraft:illusioner,tag=yadventures-bosses.candidate] remove yadventures-bosses.candidate
+execute at @n[type=minecraft:illusioner,tag=yadventures-bosses.swap] run summon minecraft:marker ~ ~ ~ {Tags:["yadventures-bosses.swap_point"]}
+tp @n[type=minecraft:illusioner,tag=yadventures-bosses.swap] ~ ~ ~
+tp @s @n[type=minecraft:marker,tag=yadventures-bosses.swap_point]
+execute at @s run particle minecraft:cloud ~ ~1 ~ 0.3 0.6 0.3 0.05 16
+kill @e[type=minecraft:marker,tag=yadventures-bosses.swap_point]
+tag @e[type=minecraft:illusioner,tag=yadventures-bosses.swap] remove yadventures-bosses.swap
 `)

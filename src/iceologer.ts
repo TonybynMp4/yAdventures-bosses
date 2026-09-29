@@ -172,6 +172,8 @@ fn('yadventures-bosses:iceologer/cast/start', `
 scoreboard players set #spell yadventures-bosses.dummy 0
 execute if score @s yadventures-bosses.slow_cd matches ..0 run scoreboard players set #spell yadventures-bosses.dummy 2
 execute if score @s yadventures-bosses.chunk_cd matches ..0 run scoreboard players set #spell yadventures-bosses.dummy 1
+# Don't cast the ice chunk twice in a row while slowness is ready too
+execute if score #spell yadventures-bosses.dummy matches 1 if score @s yadventures-bosses.state matches 1 if score @s yadventures-bosses.slow_cd matches ..0 run scoreboard players set #spell yadventures-bosses.dummy 2
 execute if score @s yadventures-bosses.stray_cd matches ..0 run function yadventures-bosses:iceologer/count_strays
 execute if score @s yadventures-bosses.stray_cd matches ..0 if score #count yadventures-bosses.dummy matches ..1 run scoreboard players set #spell yadventures-bosses.dummy 3
 execute if score #spell yadventures-bosses.dummy matches 0 run return fail
@@ -254,15 +256,19 @@ attribute @s minecraft:movement_speed modifier remove yadventures-bosses:casting
 
 // ---- freezing: mobs get powder snow freezing (TicksFrozen), players (not data-modifiable) an imitation
 fn('yadventures-bosses:iceologer/freeze', `
-particle minecraft:snowflake ~ ~1 ~ 0.4 0.8 0.4 0.02 20
+particle minecraft:snowflake ~ ~1 ~ 0.4 0.8 0.4 0.05 40
+particle minecraft:item_snowball ~ ~1 ~ 0.4 0.8 0.4 0.1 20
+playsound minecraft:block.powder_snow.break hostile @a ~ ~ ~ 1 0.8
+playsound minecraft:entity.player.hurt_freeze hostile @a ~ ~ ~ 1 1
 execute if entity @s[type=minecraft:player] run return run function yadventures-bosses:iceologer/freeze_player
 data modify entity @s TicksFrozen set value 400
 `)
 fn('yadventures-bosses:iceologer/freeze_player', `
+effect give @s minecraft:slowness 7 2
+# Leather armor protects from the freezing, not the slowness
 execute if items entity @s armor.* #minecraft:freeze_immune_wearables run return fail
 # Like TicksFrozen 400 thawing out: fully frozen for 130 ticks, 1 freeze damage every 40 ticks
 scoreboard players set @s yadventures-bosses.frozen 130
-effect give @s minecraft:slowness 7 2
 `)
 fn('yadventures-bosses:iceologer/frozen_player', `
 scoreboard players remove @s yadventures-bosses.frozen 1

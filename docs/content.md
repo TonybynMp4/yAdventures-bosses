@@ -17,7 +17,8 @@ three spells (see [mechanics.md](mechanics.md)):
 - **Ice chunk** (every 8 s): a chunk of ice grows above the target, follows it for 3–5 s, then
   falls: 12 magic damage and freezing to everything under it (except illagers). Under a low roof it
   hovers lower.
-- **Slowness** (every 11 s): freezes the target as if it had been in powder snow.
+- **Slowness** (every 11 s): Slowness III for 7 s, and freezes the target as if it had been in powder
+  snow (players in leather armor only get the slowness).
 - **Strays** (every 24 s, only while at most 1 of its strays is alive): 3–4 strays appear within 10 blocks,
   each with an iron axe or a bow.
 

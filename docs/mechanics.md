@@ -135,7 +135,8 @@ invisibility, just in case.
   villager, wandering trader or glow squid. Line of sight is a 0.5-block raycast
   (`yadventures-bosses:util/raycast`) through `#yadventures-bosses:see_through`. When hurt, it targets the attacker
   (unless it's an illager or a creative player).
-- Casts a spell when it has a target and a spell is off cooldown (strays first, then ice chunk, then slowness).
+- Casts a spell when it has a target and a spell is off cooldown (strays first, then ice chunk, then slowness;
+  slowness instead of a second ice chunk in a row when both are ready).
 
 **Targets** are stored as ids: `yadventures-bosses:util/uid` gives the target a permanent
 `yadventures-bosses.uid`, and the Iceologer (or ice chunk) keeps it in `yadventures-bosses.target`.
@@ -154,11 +155,11 @@ invisibility, just in case.
   axe or a bow (50/50, default drop chance), and wearing an
   icy leather helmet (drop chance 0) so they don't burn in daylight. Vanilla stray loot.
 - Particle colours: strays (0.7, 0.85, 0.95).
-- Slowness: mobs get `TicksFrozen` 400 (powder snow freezing). Players can't be data-modified, so
-  `yadventures-bosses:iceologer/freeze_player` imitates it: unless they wear
+- Slowness: a burst of snowflakes and snowball particles with powder-snow and freeze-hurt sounds on the target.
+  Mobs get `TicksFrozen` 400 (powder snow freezing). Players get Slowness III for 7 s; they can't be
+  data-modified, so `yadventures-bosses:iceologer/freeze_player` imitates the freezing: unless they wear
   `#minecraft:freeze_immune_wearables`, `yadventures-bosses.frozen` is set to 130 ticks (how long 400 frozen
-  ticks stay "fully frozen" while thawing), with Slowness III for 7 s, snowflakes, and 1 `freeze`
-  damage every 40 ticks.
+  ticks stay "fully frozen" while thawing), with snowflakes and 1 `freeze` damage every 40 ticks.
 
 **Ice chunk** (`item_display` tagged `yadventures-bosses.ice_chunk`, model `yadventures-bosses:ice_chunk`):
 - Spawns above the target at its height squared, capped at 6 (players 3.24, villagers 3.8,
@@ -211,6 +212,10 @@ Replaces the vanilla mirror/invisibility spell with real illusions:
   (`yadventures-bosses:entities/empty`), zero drop chances, same `yadventures-bosses.id` as the owner.
 - A copy vanishes when hit, after 600 ticks (`yadventures-bosses.timer`), or when no real illusioner with the
   same id is within 64 blocks.
+- Escape (`illusioner/escape/*`): while on cooldown, 2 hits within 3 s (`yadventures-bosses.hits`,
+  `hit_window` 60 ticks) or 8+ damage in that window (`hit_damage`, from `health` = last tick's Health×100) make it
+  swap places with a random copy of its own within 32 blocks (mirror sound, clouds, 1 s invisibility). With
+  no copies left it teleports to a random point of the 9-block ring instead (`#mode` 2 = teleport only).
 
 ## Totems (`yadventures-bosses:totem/*`)
 
@@ -256,12 +261,13 @@ particles, then runs `yadventures-bosses:totem/<kind>`.
   `wildfire/next_attack` picks one (random 1..5): 1–2 barrage; 3–4 shockwave if the target is
   within 6, else charge if within 20, else barrage; 5 summon if none of its blazes are alive, else as 3–4. First attack 1 s
   after spawning.
-  - Shockwave: 20-tick windup (body display moves down then slams), 8 damage to everything within
-    7 except `#yadventures-bosses:wildfire_allies` and the model; ring of flame particles.
+  - Shockwave: 20-tick windup (body display moves down then slams), then a blast on the ground below
+    it (first non-passable block, up to 8 blocks down): 16 damage to everything within 7 of that point
+    except `#yadventures-bosses:wildfire_allies` and the model; ring of flame particles and explosions.
   - Charge: 15-tick windup (flame particles, low blaze sound), then the direction to the target's
     eyes is locked (`charge_x/y/z`, ×1000) and Motion is set to 1.2 blocks/tick along it for up
     to 15 ticks. The first tick anything living (except allies) is within 2.2 of its center, all of
-    them take 10 damage and the charge stops. It always ends in a shockwave where it stopped.
+    them take 20 damage and the charge stops. It always ends in a shockwave where it stopped.
   - Summon blazes: 1–2 blazes tagged `yadventures-bosses.wildfire_blaze` with the same
     `yadventures-bosses.id`.
   - Barrage: a volley of 8 small fireballs every 11 ticks until 32 are fired, aimed with a
@@ -301,6 +307,7 @@ and award hearts:
 | `yadventures-bosses.cooldown` | illusioner copy cooldown |
 | `yadventures-bosses.decoy` | ring id a distracted mob should attack |
 | `yadventures-bosses.health`, `yadventures-bosses.shields`, `yadventures-bosses.absorbed`, `yadventures-bosses.regen`, `yadventures-bosses.shield_hp` | wildfire shields |
+| `yadventures-bosses.hits`, `yadventures-bosses.hit_damage`, `yadventures-bosses.hit_window` | illusioner escape (with `health`) |
 | `yadventures-bosses.home_x`, `home_y`, `home_z` | spawner bosses' leash position |
 | `yadventures-bosses.state`, `yadventures-bosses.attack_cd`, `yadventures-bosses.charge_x/y/z`, `yadventures-bosses.fired`, `yadventures-bosses.wander`, `yadventures-bosses.wander_x/z` | wildfire AI (`state` is also the Iceologer's current spell) |
 | `yadventures-bosses.uid`, `yadventures-bosses.target` | Iceologer / ice chunk targets (`#next yadventures-bosses.uid` = counter) |
