@@ -7,7 +7,7 @@ import { fn, GRAY, snbt } from './lib.ts'
 // Each boss structure gets a trial spawner (normal + ominous config) and a normal + ominous vault.
 // The spawner spawns a bare mob tagged yadventures-bosses.convert, which the tick turns into the boss in
 // place (the spawner tracks it by UUID). Beating it ejects a boss key per player, which opens the vault.
-export const BOSS_ENTITY = { iceologer: 'minecraft:evoker', illusioner: 'minecraft:illusioner', wildfire: 'minecraft:blaze' }
+export const BOSS_ENTITY = { iceologer: 'minecraft:wandering_trader', illusioner: 'minecraft:illusioner', wildfire: 'minecraft:blaze' }
 type Boss = keyof typeof BOSS_ENTITY
 export const BOSSES = Object.keys(BOSS_ENTITY) as Boss[]
 export const BOSS_NAME: Record<Boss, string> = { iceologer: 'Iceologer', illusioner: 'Illusioner', wildfire: 'Wildfire' }
@@ -20,7 +20,7 @@ function bossNbt(boss: Boss, ominous: boolean, spawner: boolean) {
     id: BOSS_ENTITY[boss], Tags: ['yadventures-bosses.convert', `yadventures-bosses.convert.${boss}`,
       ...(ominous ? ['yadventures-bosses.ominous'] : []), ...(spawner ? ['yadventures-bosses.from_spawner'] : [])],
   }
-  if (boss !== 'illusioner') { // hide the evoker / blaze until it's converted
+  if (boss !== 'illusioner') { // hide the wandering trader / blaze until it's converted
     nbt.Silent = true
     nbt.active_effects = [{ id: 'minecraft:invisibility', duration: -1, show_particles: false }]
   }
