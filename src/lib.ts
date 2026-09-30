@@ -21,3 +21,6 @@ export const range = (n: number) => [...Array(n).keys()]
 
 export const GRAY = { color: 'gray', italic: false }
 export const BLUE = { color: 'blue', italic: false }
+
+// Open to the sky (leaves don't count): @s reaches the top of its column's motion-blocking blocks
+export const EXPOSED = 'positioned over motion_blocking_no_leaves positioned ~ ~-1 ~ if entity @s[dx=0,dy=64,dz=0]'

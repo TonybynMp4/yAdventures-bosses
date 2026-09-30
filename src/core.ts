@@ -1,5 +1,5 @@
 import { Tag } from 'sandstone'
-import { fn, pyFloat, range } from './lib.ts'
+import { EXPOSED, fn, pyFloat, range } from './lib.ts'
 
 // ============================================================ load / tick
 const round6 = (x: number) => Math.round(x * 1e6) / 1e6
@@ -125,30 +125,40 @@ execute if predicate yadventures-bosses:chance/third run item replace entity @s 
 // ============================================================ ring of illusions (shared by illusioner + totem)
 // #mode: 0 = illusioner, 1 = player, 2 = teleport only (illusioner escape). #tp = index of the point the caster teleports to.
 fn('yadventures-bosses:util/ring', `
+scoreboard players set #sky yadventures-bosses.dummy 0
+execute ${EXPOSED} run scoreboard players set #sky yadventures-bosses.dummy 1
 $execute rotated $(yaw) 0 run function yadventures-bosses:util/ring_points
 `)
 fn('yadventures-bosses:util/ring_points', [
   'scoreboard players set #i yadventures-bosses.dummy 0',
   ...range(9).map((k) => `execute rotated ~${k * 40} 0 positioned ^ ^ ^9 run function yadventures-bosses:util/ring_point`),
 ].join('\n'))
+const GROUND = 'if block ~ ~ ~ #yadventures-bosses:passable if block ~ ~1 ~ #yadventures-bosses:passable unless block ~ ~-1 ~ #yadventures-bosses:passable unless block ~ ~-1 ~ minecraft:lava unless block ~ ~-1 ~ minecraft:water'
+// Caster outdoors: only the surface of the point's column, 4 above to 16 below the caster (the point is 9 blocks
+// out, so shifted up 6 that is a distance of at most sqrt(9² + 10²)), so nothing lands in caves or basements.
+// Caster under a roof: ground found without crossing floors: down through passable blocks (up to 16), or up
+// through at most 3 solid ones.
 fn('yadventures-bosses:util/ring_point', `
 scoreboard players add #i yadventures-bosses.dummy 1
-scoreboard players set #found yadventures-bosses.dummy 0
+execute if score #sky yadventures-bosses.dummy matches 1 positioned over motion_blocking_no_leaves positioned ~ ~6 ~ if entity @s[distance=..13.45] positioned ~ ~-6 ~ ${GROUND} run return run function yadventures-bosses:util/ring_action
+execute if score #sky yadventures-bosses.dummy matches 1 run return 0
 scoreboard players set #depth yadventures-bosses.dummy 0
-function yadventures-bosses:util/ground_down
-scoreboard players set #depth yadventures-bosses.dummy 0
-execute if score #found yadventures-bosses.dummy matches 0 positioned ~ ~1 ~ run function yadventures-bosses:util/ground_up
+execute if block ~ ~ ~ #yadventures-bosses:passable run return run function yadventures-bosses:util/ground_down
+execute positioned ~ ~1 ~ run function yadventures-bosses:util/ground_up
 `)
-const GROUND = 'if block ~ ~ ~ #yadventures-bosses:passable if block ~ ~1 ~ #yadventures-bosses:passable unless block ~ ~-1 ~ #yadventures-bosses:passable unless block ~ ~-1 ~ minecraft:lava unless block ~ ~-1 ~ minecraft:water'
-for (const [dir, dy] of [['down', '-1'], ['up', '1']]) {
-  fn(`yadventures-bosses:util/ground_${dir}`, `
+fn('yadventures-bosses:util/ground_down', `
 execute ${GROUND} align y run return run function yadventures-bosses:util/ring_action
+execute unless block ~ ~-1 ~ #yadventures-bosses:passable run return 0
 scoreboard players add #depth yadventures-bosses.dummy 1
-execute if score #depth yadventures-bosses.dummy matches ..16 positioned ~ ~${dy} ~ run function yadventures-bosses:util/ground_${dir}
+execute if score #depth yadventures-bosses.dummy matches ..16 positioned ~ ~-1 ~ run function yadventures-bosses:util/ground_down
 `)
-}
+fn('yadventures-bosses:util/ground_up', `
+execute ${GROUND} align y run return run function yadventures-bosses:util/ring_action
+execute if block ~ ~ ~ #yadventures-bosses:passable run return 0
+scoreboard players add #depth yadventures-bosses.dummy 1
+execute if score #depth yadventures-bosses.dummy matches ..2 positioned ~ ~1 ~ run function yadventures-bosses:util/ground_up
+`)
 fn('yadventures-bosses:util/ring_action', `
-scoreboard players set #found yadventures-bosses.dummy 1
 execute if score #i yadventures-bosses.dummy = #tp yadventures-bosses.dummy run return run function yadventures-bosses:util/ring_teleport
 execute if score #mode yadventures-bosses.dummy matches 2 run return 0
 execute if score #mode yadventures-bosses.dummy matches 0 run return run function yadventures-bosses:illusioner/summon_illusion

@@ -1,4 +1,4 @@
-import { fn } from './lib.ts'
+import { EXPOSED, fn } from './lib.ts'
 
 // ============================================================ iceologer
 // An invisible wandering trader wearing the model: the head item renders on its head and the body is an
@@ -266,7 +266,13 @@ function yadventures-bosses:iceologer/strays/summon_loop
 execute store result score #y yadventures-bosses.dummy run data get entity @s Pos[1]
 execute store result storage yadventures-bosses:data stray.y int 1 run scoreboard players add #y yadventures-bosses.dummy 3
 function yadventures-bosses:iceologer/strays/spread with storage yadventures-bosses:data stray
+# Outdoors, strays that landed under something (spreadplayers found a cave or a basement) move up to the
+# surface, or back to the Iceologer if that's above its y + 3
+scoreboard players set #sky yadventures-bosses.dummy 0
+execute ${EXPOSED} run scoreboard players set #sky yadventures-bosses.dummy 1
+tag @s add yadventures-bosses.this
 execute as @e[type=minecraft:stray,tag=yadventures-bosses.new] at @s run function yadventures-bosses:iceologer/strays/init
+tag @s remove yadventures-bosses.this
 `)
 fn('yadventures-bosses:iceologer/strays/summon_loop', `
 summon minecraft:stray ~ ~ ~ {Tags:["yadventures-bosses.iceologer_stray","yadventures-bosses.new"],equipment:{head:{id:"minecraft:leather_helmet",count:1,components:{"minecraft:dyed_color":10539248}}},drop_chances:{head:0f}}
@@ -278,6 +284,7 @@ $spreadplayers ~ ~ 1 10 under $(y) false @e[type=minecraft:stray,tag=yadventures
 `)
 fn('yadventures-bosses:iceologer/strays/init', `
 tag @s remove yadventures-bosses.new
+execute if score #sky yadventures-bosses.dummy matches 1 unless function yadventures-bosses:iceologer/strays/exposed run function yadventures-bosses:iceologer/strays/surface
 scoreboard players operation @s yadventures-bosses.id = #id yadventures-bosses.dummy
 team join yadventures-bosses.illagers @s
 execute store result score #r yadventures-bosses.dummy run random value 0..1
@@ -285,6 +292,15 @@ execute if score #r yadventures-bosses.dummy matches 0 run item replace entity @
 execute if score #r yadventures-bosses.dummy matches 1 run item replace entity @s weapon.mainhand with minecraft:bow
 particle minecraft:snowflake ~ ~1 ~ 0.3 0.6 0.3 0.05 20
 particle minecraft:poof ~ ~1 ~ 0.3 0.5 0.3 0.02 8
+`)
+fn('yadventures-bosses:iceologer/strays/exposed', `
+execute ${EXPOSED} run return 1
+return fail
+`)
+fn('yadventures-bosses:iceologer/strays/surface', `
+execute positioned over motion_blocking_no_leaves run tp @s ~ ~ ~
+execute store result score #sy yadventures-bosses.dummy run data get entity @s Pos[1]
+execute if score #sy yadventures-bosses.dummy > #y yadventures-bosses.dummy run tp @s @n[type=minecraft:wandering_trader,tag=yadventures-bosses.this]
 `)
 fn('yadventures-bosses:iceologer/cast/end', `
 scoreboard players set @s yadventures-bosses.cast 0

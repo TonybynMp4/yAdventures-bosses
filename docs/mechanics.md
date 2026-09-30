@@ -157,7 +157,9 @@ sends to clients right away, a tick before `iceologer/tick` can disguise it. So 
   ice chunk (0.4, 0.3, 0.35), slowness (0.1, 0.1, 0.2)).
 - Tick 20: cast sound and the spell. The pose ends at tick 30 (ice chunk) or 20 (slowness, strays).
 - Strays (`iceologer/strays/*`): 3–4 (ominous 4) `stray`s, spread with `spreadplayers` within 10 blocks
-  (ground below the Iceologer's y + 3; if that fails they stay at the Iceologer). Tagged
+  (ground below the Iceologer's y + 3; if that fails they stay at the Iceologer). If the Iceologer is outdoors,
+  strays that landed under something (a cave or basement) move to the surface of their column, or back to the
+  Iceologer if that's above its y + 3. Tagged
   `yadventures-bosses.iceologer_stray`, on the `illagers` team (their arrows don't hurt it), holding an iron
   axe or a bow (50/50, default drop chance), and wearing an
   icy leather helmet (drop chance 0) so they don't burn in daylight. Vanilla stray loot.
@@ -202,8 +204,11 @@ Used by both the Illusioner and the Totem of Illusion. `#mode yadventures-bosses
 1. `start_ring`: new id (`#next yadventures-bosses.id` → caster's `yadventures-bosses.id` and `#id`), random teleport index
    `#tp` in 1..9 and random ring yaw.
 2. `ring_points`: 9 points 40° apart, 9 blocks out (`^ ^ ^9`).
-3. `ring_point`: finds ground within 16 blocks down, then up: two `#yadventures-bosses:passable` blocks over a
-   non-passable, non-fluid block.
+3. `ring_point`: if the caster is outdoors (`#sky`: it reaches the top of its column's
+   `motion_blocking_no_leaves` heightmap), only the surface of the point's column counts, 4 above to 16 below the
+   caster, so nothing lands in caves or basements. Under a roof, it looks for ground without crossing floors: down
+   through `#yadventures-bosses:passable` blocks (up to 16), or up through at most 3 solid ones. Ground = two
+   passable blocks over a non-passable, non-fluid block.
 4. `ring_action`: point `#tp` teleports the caster there, the others spawn a copy.
 
 `yadventures-bosses:util/vanish` = poof particles + tp to y −1000 + kill (no death animation/drops).
