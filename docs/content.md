@@ -26,14 +26,16 @@ It drops 10 XP when killed by a player.
 
 ## Structures (`yadventures-bosses:worldgen/structure/*`)
 
-| Structure | Biomes | Spacing / separation |
+| Structure | Biomes | Spacing / separation, frequency |
 |---|---|---|
-| `yadventures-bosses:iceologer_cabin` | snowy taiga, grove, snowy slopes, snowy plains | 56 / 14, 4 chunks away from villages |
-| `yadventures-bosses:illusioner_shack`, `illusioner_training_grounds` | `#is_taiga` | one set (`illusioner_lairs`, weight 1 each): 40 / 10, 4 chunks away from villages |
-| `yadventures-bosses:citadel` | `#is_nether` | 32 / 10, 8 chunks away from nether complexes |
+| `yadventures-bosses:iceologer_cabin` | snowy taiga, grove, snowy slopes, snowy plains | 64 / 16, frequency 0.5, 4 chunks away from villages |
+| `yadventures-bosses:illusioner_shack`, `illusioner_training_grounds` | `#is_taiga` | one set (`illusioner_lairs`, weight 1 each): 64 / 16, frequency 0.5, 4 chunks away from villages |
+| `yadventures-bosses:citadel` | `#is_nether` | 32 / 10, frequency 1, 8 chunks away from nether complexes |
 
 For comparison, vanilla uses: igloo and desert pyramid 32 / 8, trial chambers 34 / 12,
-woodland mansion 80 / 20, and nether complexes 27 / 4.
+woodland mansion 80 / 20, nether complexes 27 / 4, and pillager outposts 32 / 8 with frequency 0.2.
+With frequency 0.5, the cabin and the lairs average one structure per about 1450×1450 blocks
+of matching biome.
 
 Chest/barrel loot tables: `yadventures-bosses:chests/*`, `yadventures-bosses:barrels/*`.
 
