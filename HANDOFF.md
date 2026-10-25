@@ -40,8 +40,9 @@ first (`README.md`, `mechanics.md`, `content.md`, `scripts.md`, `minecraft-notes
   - Bad Omen switches the spawner to ominous, which spawns a buffed boss.
   - Summon helpers: `commands/summon/{,ominous_}<boss>`.
 - **Rarity:**
-  - Iceologer cabin: 56/14.
-  - Illusioner shack and training grounds merged into one set (`illusioner_lairs`): 40/10.
+  - Iceologer cabin: 64/16, frequency 0.5.
+  - Illusioner shack and training grounds merged into one set (`illusioner_lairs`): 64/16,
+    frequency 0.5.
   - Citadel: 32/10.
 - **Explorer maps** (`loot_table/maps/<citadel|iceologer|illusioner>`, `give/<x>_map`):
   - Icons reuse the unused vanilla marker types, retextured (`target_x`, `target_point`,
