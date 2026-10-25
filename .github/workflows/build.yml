@@ -5,6 +5,11 @@ on:
   pull_request:
   workflow_dispatch:
   workflow_call: # release.yml runs these jobs before publishing
+    inputs:
+      version:
+        description: Version shown in the pack descriptions
+        type: string
+        default: ''
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,6 +38,8 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run build
+        env:
+          PACK_VERSION: ${{ inputs.version }}
       # Each artifact downloads as a zip with pack.mcmeta at its root, ready to drop in
       - uses: actions/upload-artifact@v7
         with:

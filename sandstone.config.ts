@@ -1,14 +1,21 @@
 import type { SandstoneConfig } from 'sandstone'
 
+// Shown in the pack descriptions, so the installed version is visible in game. Releases set
+// PACK_VERSION to the tag; local builds use git describe (e.g. 0.4.1-3-g67bdf85-dirty)
+const version =
+  process.env.PACK_VERSION ||
+  Bun.spawnSync(['git', 'describe', '--tags', '--always', '--dirty']).stdout.toString().trim() ||
+  'dev'
+
 export default {
   name: 'yAdventures-bosses',
   packs: {
     datapack: {
-      description: 'yAdventures bosses: Iceologer, Illusioner & Wildfire',
+      description: `yAdventures bosses ${version}: Iceologer, Illusioner & Wildfire`,
       packFormat: 121,
     },
     resourcepack: {
-      description: 'yAdventures bosses: Iceologer, Illusioner & Wildfire assets',
+      description: `yAdventures bosses ${version}: Iceologer, Illusioner & Wildfire assets`,
       packFormat: 97,
     },
   },
