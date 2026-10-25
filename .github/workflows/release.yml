@@ -55,7 +55,10 @@ jobs:
 
   # Typecheck, build and load test, the same jobs as on every push; don't release a pack that fails to load
   build:
+    needs: version
     uses: ./.github/workflows/build.yml
+    with:
+      version: ${{ needs.version.outputs.tag }}
 
   publish:
     needs: [version, build]
@@ -79,11 +82,46 @@ jobs:
           for pack in datapack resourcepack; do
             (cd packs/yAdventures-bosses-$pack && zip -qr "$GITHUB_WORKSPACE/dist/yAdventures-bosses-$pack-$TAG.zip" .)
           done
+      # Compares each pack with the previous release's zip, ignoring the version in pack.mcmeta's
+      # description. An unchanged pack is republished as the previous zip, under the version it was
+      # last changed in (read from its description), so the notes and the game agree on it.
+      - name: Reuse unchanged packs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mcmeta() { jq -S '.pack.description |= sub("^yAdventures bosses[^:]*: "; "")' "$1/pack.mcmeta"; }
+          for pack in datapack resourcepack; do
+            new=packs/yAdventures-bosses-$pack old=prev/$pack since=
+            # A reused zip keeps the version it was built in, so match any version
+            if [ -n "$PREV" ] && gh release download "$PREV" -p "yAdventures-bosses-$pack-*.zip" -D "$old.zip.d" \
+              && zip=$(ls "$old".zip.d/*.zip) && unzip -q "$zip" -d "$old" \
+              && diff -rq -x pack.mcmeta "$old" "$new" && [ "$(mcmeta "$old")" = "$(mcmeta "$new")" ]; then
+              since=$(jq -r .pack.description "$old/pack.mcmeta" | sed -nE 's/^yAdventures bosses ([^:]+):.*/\1/p')
+              if [ -n "$since" ]; then
+                rm "dist/yAdventures-bosses-$pack-$TAG.zip"
+                cp "$zip" "dist/yAdventures-bosses-$pack-$since.zip"
+              else
+                since=$PREV # released before the version was in the description: keep the new build
+              fi
+            fi
+            echo "$pack=$since" >> since
+          done
+          cat since; ls dist
       # Commits since the previous version tag (all of them for the first release); GitHub links the hashes
       - name: Write the notes
         run: |
+          . ./since
+          status() {
+            if [ -z "$1" ]; then echo "**updated**${PREV:+ since $PREV}"
+            else echo "unchanged since $1"; fi
+          }
           {
             cat .github/release-notes.md
+            echo
+            echo "## Packs in this release"
+            echo
+            echo "- Datapack: $(status "$datapack")"
+            echo "- Resource pack: $(status "$resourcepack")"
             echo
             echo "## Commits${PREV:+ since $PREV}"
             echo
