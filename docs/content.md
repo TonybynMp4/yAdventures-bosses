@@ -35,7 +35,8 @@ It drops 10 XP when killed by a player.
 For comparison, vanilla uses: igloo and desert pyramid 32 / 8, trial chambers 34 / 12,
 woodland mansion 80 / 20, nether complexes 27 / 4, and pillager outposts 32 / 8 with frequency 0.2.
 With frequency 0.5, the cabin and the lairs average one structure per about 1450×1450 blocks
-of matching biome.
+of matching biome. Structure-set changes only apply to newly generated chunks: existing chunks
+keep the structures they already have.
 
 Chest/barrel loot tables: `yadventures-bosses:chests/*`, `yadventures-bosses:barrels/*`.
 
@@ -62,6 +63,7 @@ The chest maps come from overridden vanilla tables, each with one pool added.
 to `#minecraft:cartographer/level_3`. It is limited to snowy villagers (`merchant_predicate`) and
 costs 13 emeralds + a compass (like the monument map), 100-chunk search. A journeyman cartographer
 offers 2 of its level's eligible trades, so about half of snowy cartographers sell it.
+Villager trades are a dynamic registry, so trade changes need a server restart, not `/reload`.
 
 ## Trial spawners, keys and vaults
 
