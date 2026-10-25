@@ -315,6 +315,9 @@ and award hearts:
 - Entity tags `yadventures.boss.iceologer` and `yadventures.boss.wildfire` on the bosses, and
   `yadventures.boss.illusion` on the Illusioner's illusions (so killing them doesn't count).
 
+Never put a load or tick function in `yadventures`. The pack used to be namespaced `yadventures`,
+which collided with the heart pack's `yadventures:load`, so the boss pack never loaded.
+
 ## Scoreboards / storage
 
 | Objective | Used for |
@@ -337,3 +340,10 @@ Storage `yadventures-bosses:data`: `shield_rotation`, and scratch space for macr
 `brew`, `spin`, `shields`).
 
 Team `yadventures-bosses.illagers` (friendly fire off): the Iceologer and `#yadventures-bosses:prevent_aggression` mobs.
+
+## Not yet verified
+
+- The spawner lock was tested with one player; two players (one eligible, one not) is untested.
+- A live Iceologer attack from the on-floor spawner (spawn and key were verified, combat wasn't).
+- Illusioner map from mansion chests: the loot table works, but test rolls gave 0 of 20. That's
+  likely because `skip_existing_chunks` had used up the nearby lairs during testing.
