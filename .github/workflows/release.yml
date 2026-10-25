@@ -113,7 +113,7 @@ jobs:
           . ./since
           status() {
             if [ -z "$1" ]; then echo "**updated**${PREV:+ since $PREV}"
-            else echo "unchanged since $1, keep the one you have"; fi
+            else echo "unchanged since $1"; fi
           }
           {
             cat .github/release-notes.md
@@ -122,8 +122,6 @@ jobs:
             echo
             echo "- Datapack: $(status "$datapack")"
             echo "- Resource pack: $(status "$resourcepack")"
-            echo
-            echo "The version is in each pack's description (the pack list in game)."
             echo
             echo "## Commits${PREV:+ since $PREV}"
             echo
