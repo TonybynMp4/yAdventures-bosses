@@ -89,7 +89,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mcmeta() { jq -S 'del(.pack.description)' "$1/pack.mcmeta"; }
+          mcmeta() { jq -S '.pack.description |= sub("^yAdventures bosses[^:]*: "; "")' "$1/pack.mcmeta"; }
           for pack in datapack resourcepack; do
             new=packs/yAdventures-bosses-$pack old=prev/$pack since=
             # A reused zip keeps the version it was built in, so match any version
