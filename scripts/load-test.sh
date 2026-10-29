@@ -61,8 +61,10 @@ grep -q 'Done (' log.txt || { echo 'server did not finish starting'; fail=1; }
 grep -q 'file/yadv' log.txt || { echo 'datapack not enabled'; fail=1; }
 passed=$(grep -c 'Test passed. Count: 2$' log.txt || true)
 [ "$passed" = 3 ] || { echo "expected 2 of each boss alive after 10 s, $passed of 3 checks passed"; fail=1; }
+# The yadventures:heart/* overrides have no parent without yAdventures, so vanilla skips them
 if grep -Ei '/(WARN|ERROR)\]|exception|failed|couldn.t|unknown or incomplete|incorrect argument|<--\[HERE\]' log.txt \
-  | grep -v "Can't keep up" | grep -v 'Ambiguity between arguments'; then
+  | grep -v "Can't keep up" | grep -v 'Ambiguity between arguments' \
+  | grep -Ev "Couldn't load advancements: \[(yadventures:heart/[a-z_]+(, )?)+\]$"; then
   echo 'errors or warnings in the log (above)'; fail=1
 fi
 [ $fail = 0 ] && echo 'load test passed'

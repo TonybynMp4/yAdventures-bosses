@@ -1,0 +1,42 @@
+{
+  "parent": "yadventures:heart/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:nether_star"
+    },
+    "title": "Wither",
+    "description": [
+      "Defeat the Wither\n",
+      {
+        "text": "+1 ❤",
+        "color": "red"
+      }
+    ],
+    "frame": "challenge",
+    "show_toast": false,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "wither": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "minecraft:wither"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "wither"
+    ]
+  ],
+  "rewards": {
+    "function": "yadventures:hearts/gained"
+  }
+}

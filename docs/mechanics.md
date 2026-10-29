@@ -314,6 +314,24 @@ and award hearts:
   `#yadventures:compat/bosses` tag.
 - Entity tags `yadventures.boss.iceologer` and `yadventures.boss.wildfire` on the bosses, and
   `yadventures.boss.illusion` on the Illusioner's illusions (so killing them doesn't count).
+- Six hand-maintained heart advancements in `resources/datapack/data/yadventures/advancement/heart/`
+  that override yAdventures's "Boss Hearts" tab (advancement JSON can't change at load):
+  - `wildfire`, `iceologer`, `illusioner`: `"hidden": false` instead of `true`, so these hearts
+    show from the start (this pack always provides those bosses).
+  - `wither`, `creaking`, `bastion`: the gray "(+… ❤ without a …)" part of the description is
+    dropped, since that case can't happen while this pack is loaded.
+
+  Everything else (criteria, requirements, `rewards.function`, parent, icon, title, frame, toast,
+  chat) is copied from yAdventures's built files, generated from its `src/hearts.ts`. Update these
+  six files whenever `src/hearts.ts` changes: a criteria mismatch would change how players earn
+  hearts. The overrides only apply when this pack has higher priority than yAdventures
+  (above it in the data pack screen, after it in `/datapack list`); otherwise yAdventures's
+  versions win, which is still correct, just less informative.
+- Empty entity type tags `#yadventures:wildfire`, `#yadventures:iceologer` and
+  `#yadventures:illusioner` (`"replace": false`, so they merge with yAdventures's). The overrides
+  reference them, and advancements are a registry: a missing tag fails the advancement's parse,
+  which stops the world from loading when this pack is used without yAdventures. Add an empty
+  tag here for any new tag a copied advancement references.
 
 Never put a load or tick function in `yadventures`. The pack used to be namespaced `yadventures`,
 which collided with the heart pack's `yadventures:load`, so the boss pack never loaded.

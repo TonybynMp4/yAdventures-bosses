@@ -1,0 +1,42 @@
+{
+  "parent": "yadventures:heart/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:creaking_heart"
+    },
+    "title": "Creaking",
+    "description": [
+      "Defeat a Creaking\n",
+      {
+        "text": "+½ ❤",
+        "color": "red"
+      }
+    ],
+    "frame": "challenge",
+    "show_toast": false,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "creaking": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "minecraft:creaking"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "creaking"
+    ]
+  ],
+  "rewards": {
+    "function": "yadventures:hearts/gained"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "parent": "yadventures:heart/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:gilded_blackstone"
+    },
+    "title": "Bastion Treasure",
+    "description": [
+      "Loot a bastion treasure chest\n",
+      {
+        "text": "+½ ❤",
+        "color": "red"
+      }
+    ],
+    "frame": "challenge",
+    "show_toast": false,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "bastion": {
+      "trigger": "minecraft:player_generates_container_loot",
+      "conditions": {
+        "loot_tables": "minecraft:chests/bastion_treasure"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "bastion"
+    ]
+  ],
+  "rewards": {
+    "function": "yadventures:hearts/gained"
+  }
+}
