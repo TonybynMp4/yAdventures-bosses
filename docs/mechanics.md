@@ -325,7 +325,13 @@ and award hearts:
   chat) is copied from yAdventures's built files, generated from its `src/hearts.ts`. Update these
   six files whenever `src/hearts.ts` changes: a criteria mismatch would change how players earn
   hearts. The overrides only apply when this pack has higher priority than yAdventures
-  (above it in the data pack screen, after it in `/datapack list`); otherwise yAdventures's versions win, which is still correct, just less informative.
+  (above it in the data pack screen, after it in `/datapack list`); otherwise yAdventures's
+  versions win, which is still correct, just less informative.
+- Empty entity type tags `#yadventures:wildfire`, `#yadventures:iceologer` and
+  `#yadventures:illusioner` (`"replace": false`, so they merge with yAdventures's). The overrides
+  reference them, and advancements are a registry: a missing tag fails the advancement's parse,
+  which stops the world from loading when this pack is used without yAdventures. Add an empty
+  tag here for any new tag a copied advancement references.
 
 Never put a load or tick function in `yadventures`. The pack used to be namespaced `yadventures`,
 which collided with the heart pack's `yadventures:load`, so the boss pack never loaded.
