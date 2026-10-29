@@ -10,3 +10,7 @@ Wildfire), their lairs, trial spawners, vaults and loot.
 **Install:** put `yAdventures-bosses-datapack-*.zip` in `<world>/datapacks/` and
 `yAdventures-bosses-resourcepack-*.zip` in `resourcepacks/`. New structures and trial spawner
 configs need a fresh world (or new chunks) and a server restart, not just `/reload`.
+
+With yAdventures installed, this datapack must have higher priority than yAdventures (above it in
+the data pack screen, after it in `/datapack list`), so the Boss Hearts tab shows the boss hearts
+from the start. If it doesn't, run `/datapack disable` and then `/datapack enable … last` on it.
